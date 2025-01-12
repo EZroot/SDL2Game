@@ -8,10 +8,10 @@ using SDL2Game.GameObjects;
 
 namespace SDL2Game
 {
-    public class Pokemanz
+    public class PokemonHandler
     {
         private const string RESOURCES_FOLDER = "/home/anon/Repos/SDL_Engine/SDL2Engine/resources";
-        private const int POKEMON_MULTIPLIER = 20;
+        private const int POKEMON_MULTIPLIER = 1;
         
         private readonly IServiceAudioLoader m_audioLoader;
         private readonly IServiceAssetManager m_assetManager;
@@ -20,10 +20,9 @@ namespace SDL2Game
         private Pokemon m_ash;
         private List<Pokemon> m_pokemonList = new List<Pokemon>();
 
-        private Vector2 m_originalScaleAsh;
         private float m_currentScaleAsh;
 
-        public Pokemanz(IServiceAudioLoader audioLoader,
+        public PokemonHandler(IServiceAudioLoader audioLoader,
                         IServiceAssetManager assetManager,
                         IServiceCameraService cameraService)
         {
@@ -42,8 +41,6 @@ namespace SDL2Game
                 originalHeight: ashTexture.Height,
                 initialPosition: new Vector2(48, 174)
             );
-
-            m_originalScaleAsh = new Vector2(ashTexture.Width, ashTexture.Height);
 
             var texturePaths = new[]
             {
@@ -90,13 +87,13 @@ namespace SDL2Game
             float deltaTime = Time.DeltaTime;
 
             if (InputManager.IsKeyPressed(SDL.SDL_Keycode.SDLK_w))
-                m_ash.Position = new Vector2(m_ash.Position.X, m_ash.Position.Y - 20f * deltaTime);
+                m_ash.Position = new Vector2(m_ash.Position.X, m_ash.Position.Y - 10f * deltaTime);
             if (InputManager.IsKeyPressed(SDL.SDL_Keycode.SDLK_a))
-                m_ash.Position = new Vector2(m_ash.Position.X - 20f * deltaTime, m_ash.Position.Y);
+                m_ash.Position = new Vector2(m_ash.Position.X - 10f * deltaTime, m_ash.Position.Y);
             if (InputManager.IsKeyPressed(SDL.SDL_Keycode.SDLK_s))
-                m_ash.Position = new Vector2(m_ash.Position.X, m_ash.Position.Y + 20f * deltaTime);
+                m_ash.Position = new Vector2(m_ash.Position.X, m_ash.Position.Y + 10f * deltaTime);
             if (InputManager.IsKeyPressed(SDL.SDL_Keycode.SDLK_d))
-                m_ash.Position = new Vector2(m_ash.Position.X + 20f * deltaTime, m_ash.Position.Y);
+                m_ash.Position = new Vector2(m_ash.Position.X + 10f * deltaTime, m_ash.Position.Y);
 
             m_ash.Update(deltaTime);
 
