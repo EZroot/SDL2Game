@@ -34,7 +34,6 @@ public class Pokemanz
     
     public void Initialize(nint renderer)
     {
-                //Sprite Test
         m_spriteTexture = m_assetManager.LoadTexture(renderer, RESOURCES_FOLDER + "/ashh.png");
         m_dstRectAsh = new SDL.SDL_Rect { x = 0, y = 0, w = m_spriteTexture.Width, h = m_spriteTexture.Height };
         m_startPosition = new Vector2(48, 174);
@@ -95,7 +94,6 @@ public class Pokemanz
             m_assetManager.LoadTexture(renderer, RESOURCES_FOLDER + "/poliwhirl.png"),
         };
 
-
         for (var i = 0; i < m_spriteTexturePokemans.Length; i++)
         {
             var width = m_spriteTexturePokemans[i].Width;
@@ -126,7 +124,6 @@ public class Pokemanz
 
         if (m_dstRectAsh.x != (int)m_position.X || m_dstRectAsh.y != (int)m_position.Y)
         {
-            // Debug.Log($"X:{position.X} Y:{position.Y}");
             m_dstRectAsh.x = (int)(m_position.X);
             m_dstRectAsh.y = (int)(m_position.Y);
         }
@@ -134,19 +131,17 @@ public class Pokemanz
     
     public void Render(nint renderer)
     {
-        #region DrawPokemons
-
         var baseScale = 0.75f;
         var amplitude = 0f;
-
-        // Trying to grab some vocals here
+        
+        // Hopefully grab vocals from these bands
         for (var i = 4; i < 16; i++)
         {
             var index = i.ToString();
             amplitude += m_audioLoader.GetAmplitudeByName(index);
         }
 
-        var scaleFactor = baseScale + amplitude; // A highre freq band, to hopefully grab vocals
+        var scaleFactor = baseScale + amplitude; 
         m_currentScale = MathHelper.Lerp(m_currentScale, scaleFactor, 0.1f);
         var maxScale = 3f;
         m_currentScale = Math.Min(m_currentScale, maxScale);
@@ -159,9 +154,10 @@ public class Pokemanz
         for (var i = 0; i < m_spriteTexturePokemans.Length; i++)
         {
             var pulseOffset = (i * 0.5f) % MathHelper.TwoPi;
+            
             // Grab low freq band for the bass
             var dynamicScaleFactor = pokemansBaseScale
-                                     + m_audioLoader.GetAmplitudeByName("1")
+                                     + m_audioLoader.GetAmplitudeByName("1") + m_audioLoader.GetAmplitudeByName("0")
                                      * (5f + (float)Math.Sin(Time.TotalTime + pulseOffset));
 
             m_currScales[i] = MathHelper.Lerp(m_currScales[i], dynamicScaleFactor, 0.1f);
@@ -179,8 +175,6 @@ public class Pokemanz
         }
 
         m_assetManager.DrawTexture(renderer, m_spriteTexture.Id, ref m_dstRectAsh);
-
-        #endregion
     }
 
     public void CleanUp()

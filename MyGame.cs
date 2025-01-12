@@ -4,6 +4,7 @@ using SDL2;
 using SDL2Engine.Core;
 using SDL2Engine.Core.Addressables;
 using SDL2Engine.Core.Addressables.Interfaces;
+using SDL2Engine.Core.CoreSystem.Configuration;
 using SDL2Engine.Core.GuiRenderer;
 using SDL2Engine.Core.GuiRenderer.Interfaces;
 using SDL2Engine.Core.Input;
@@ -20,43 +21,32 @@ public class MyGame : IGame
 
     private const int ENGINE_VOLUME = 24; // 0 - 128
 
-    private int m_windowWidth, m_windowHeight;
-
-    private IServiceWindowService m_windowService;
     private IServiceRenderService m_renderService;
-    private IServiceGuiRenderService m_guiRenderService;
-    private IServiceGuiWindowService m_guiWindowBuilder;
-    private IVariableBinder m_guiVariableBinder;
     private IServiceAssetManager m_assetManager;
     private IServiceAudioLoader m_audioLoader;
+    private IServiceWindowConfig m_windowConfig;
     private IServiceCameraService m_cameraService;
 
+    private nint m_renderer;
     private Pokemanz m_pokemanz;
     private AudioSynthesizer m_audioSynthesizer;
-    private nint m_renderer;
+    private float minHue = 0.7f, maxHue = 0.85f;
+    private float maxHueSeperation = 0.25f;
     
     public void Initialize(IServiceProvider serviceProvider)
     {
-        // Resolve services from the service provider
-        m_windowService = serviceProvider.GetService<IServiceWindowService>() 
-                          ?? throw new InvalidOperationException("IServiceWindowService is required but not registered.");
         m_renderService = serviceProvider.GetService<IServiceRenderService>() 
                           ?? throw new InvalidOperationException("IServiceRenderService is required but not registered.");
-        m_guiRenderService = serviceProvider.GetService<IServiceGuiRenderService>() 
-                             ?? throw new InvalidOperationException("IServiceGuiRenderService is required but not registered.");
-        m_guiWindowBuilder = serviceProvider.GetService<IServiceGuiWindowService>() 
-                             ?? throw new InvalidOperationException("IServiceGuiWindowService is required but not registered.");
-        m_guiVariableBinder = serviceProvider.GetService<IVariableBinder>() 
-                              ?? throw new InvalidOperationException("IVariableBinder is required but not registered.");
         m_assetManager = serviceProvider.GetService<IServiceAssetManager>() 
                          ?? throw new InvalidOperationException("IServiceAssetManager is required but not registered.");
         m_audioLoader = serviceProvider.GetService<IServiceAudioLoader>() 
                         ?? throw new InvalidOperationException("IServiceAudioLoader is required but not registered.");
         m_cameraService = serviceProvider.GetService<IServiceCameraService>() 
                           ?? throw new InvalidOperationException("IServiceCameraService is required but not registered.");
+        m_windowConfig = serviceProvider.GetService<IServiceWindowConfig>() 
+                         ?? throw new InvalidOperationException("IServiceWindowConfig is required but not registered.");
 
         Initialize();
-        // Log that initialization is complete
         Debug.Log("Initialized MyGame!");
     }
 
@@ -67,8 +57,12 @@ public class MyGame : IGame
         m_pokemanz = new Pokemanz(m_audioLoader, m_assetManager, m_cameraService);
         m_pokemanz.Initialize(m_renderer);
 
-        m_audioSynthesizer = new AudioSynthesizer(m_audioLoader);
-        m_audioSynthesizer.Initialize();
+        m_audioSynthesizer = new AudioSynthesizer(
+            m_windowConfig.Settings.Width,
+            m_windowConfig.Settings.Height,
+            m_audioLoader);
+        
+        m_audioSynthesizer.Initialize(rectWidth: 4, rectMaxHeight: 75, rectSpacing: 4, bandIntensity: 3f);
 
         var songPath = SOUND_FOLDER + "/pokemon.wav"; //"/skidrow-portal.wav"; 
 
@@ -85,11 +79,18 @@ public class MyGame : IGame
     {
         m_pokemanz.Update();
     }
-
+    
     public void Render()
     {
+        minHue += Time.DeltaTime * 0.01f;
+        maxHue += Time.DeltaTime * 0.01f;
+        if (minHue >= 1.0f) minHue -= 1.0f;
+        if (maxHue >= 1.0f) maxHue -= 1.0f;
+        if (maxHue > minHue + maxHueSeperation) maxHue = minHue + maxHueSeperation;
+        if (minHue > maxHue - maxHueSeperation) minHue = maxHue - maxHueSeperation;
+
         m_pokemanz.Render(m_renderer);
-        m_audioSynthesizer.Render(m_renderer);
+        m_audioSynthesizer.Render(m_renderer, minHue, maxHue);
     }
 
     public void Shutdown()
