@@ -4,185 +4,170 @@ using SDL2Engine.Core.Addressables;
 using SDL2Engine.Core.Addressables.Interfaces;
 using SDL2Engine.Core.Input;
 using SDL2Engine.Core.Rendering.Interfaces;
+using SDL2Game.GameObjects;
 
-namespace SDL2Game;
-
-public class Pokemanz
+namespace SDL2Game
 {
-    private const string RESOURCES_FOLDER = "/home/anon/Repos/SDL_Engine/SDL2Engine/resources";
-
-    private Vector2 m_position, m_startPosition, m_originalScale;
-    private SDL.SDL_Rect m_dstRectAsh;
-    private AssetManager.TextureData m_spriteTexture;
-    private float m_currentScale;
-    private AssetManager.TextureData[] m_spriteTexturePokemans;
-    private List<Vector2> m_originalScales = new List<Vector2>();
-    private List<float> m_currScales = new List<float>();
-    private List<SDL.SDL_Rect> m_dstRects = new List<SDL.SDL_Rect>();
-
-    private IServiceAudioLoader m_audioLoader;
-    private IServiceAssetManager m_assetManager;
-    private IServiceCameraService m_cameraService;
-
-    public Pokemanz(IServiceAudioLoader audioLoader, IServiceAssetManager assetManager,
-        IServiceCameraService cameraService)
+    public class Pokemanz
     {
-        m_audioLoader = audioLoader;
-        m_assetManager = assetManager;
-        m_cameraService = cameraService;
-    }
-    
-    public void Initialize(nint renderer)
-    {
-        m_spriteTexture = m_assetManager.LoadTexture(renderer, RESOURCES_FOLDER + "/ashh.png");
-        m_dstRectAsh = new SDL.SDL_Rect { x = 0, y = 0, w = m_spriteTexture.Width, h = m_spriteTexture.Height };
-        m_startPosition = new Vector2(48, 174);
-        m_originalScale = new Vector2(m_spriteTexture.Width, m_spriteTexture.Height);
-        m_position = m_startPosition;
-
-        //Lil pokemans
-        m_spriteTexturePokemans = new AssetManager.TextureData[]
-        {
-            m_assetManager.LoadTexture(renderer, RESOURCES_FOLDER + "/charizard.png"),
-            m_assetManager.LoadTexture(renderer, RESOURCES_FOLDER + "/gengar.png"),
-            m_assetManager.LoadTexture(renderer, RESOURCES_FOLDER + "/jigglypuff.png"),
-            m_assetManager.LoadTexture(renderer, RESOURCES_FOLDER + "/moltres.png"),
-            m_assetManager.LoadTexture(renderer, RESOURCES_FOLDER + "/squirtle.png"),
-            m_assetManager.LoadTexture(renderer, RESOURCES_FOLDER + "/ninetales.png"),
-            m_assetManager.LoadTexture(renderer, RESOURCES_FOLDER + "/poliwhirl.png"),
-            m_assetManager.LoadTexture(renderer, RESOURCES_FOLDER + "/charizard.png"),
-            m_assetManager.LoadTexture(renderer, RESOURCES_FOLDER + "/gengar.png"),
-            m_assetManager.LoadTexture(renderer, RESOURCES_FOLDER + "/jigglypuff.png"),
-            m_assetManager.LoadTexture(renderer, RESOURCES_FOLDER + "/moltres.png"),
-            m_assetManager.LoadTexture(renderer, RESOURCES_FOLDER + "/squirtle.png"),
-            m_assetManager.LoadTexture(renderer, RESOURCES_FOLDER + "/ninetales.png"),
-            m_assetManager.LoadTexture(renderer, RESOURCES_FOLDER + "/poliwhirl.png"),
-            m_assetManager.LoadTexture(renderer, RESOURCES_FOLDER + "/charizard.png"),
-            m_assetManager.LoadTexture(renderer, RESOURCES_FOLDER + "/gengar.png"),
-            m_assetManager.LoadTexture(renderer, RESOURCES_FOLDER + "/jigglypuff.png"),
-            m_assetManager.LoadTexture(renderer, RESOURCES_FOLDER + "/moltres.png"),
-            m_assetManager.LoadTexture(renderer, RESOURCES_FOLDER + "/squirtle.png"),
-            m_assetManager.LoadTexture(renderer, RESOURCES_FOLDER + "/ninetales.png"),
-            m_assetManager.LoadTexture(renderer, RESOURCES_FOLDER + "/poliwhirl.png"),
-            m_assetManager.LoadTexture(renderer, RESOURCES_FOLDER + "/charizard.png"),
-            m_assetManager.LoadTexture(renderer, RESOURCES_FOLDER + "/gengar.png"),
-            m_assetManager.LoadTexture(renderer, RESOURCES_FOLDER + "/jigglypuff.png"),
-            m_assetManager.LoadTexture(renderer, RESOURCES_FOLDER + "/moltres.png"),
-            m_assetManager.LoadTexture(renderer, RESOURCES_FOLDER + "/squirtle.png"),
-            m_assetManager.LoadTexture(renderer, RESOURCES_FOLDER + "/ninetales.png"),
-            m_assetManager.LoadTexture(renderer, RESOURCES_FOLDER + "/poliwhirl.png"),
-            m_assetManager.LoadTexture(renderer, RESOURCES_FOLDER + "/charizard.png"),
-            m_assetManager.LoadTexture(renderer, RESOURCES_FOLDER + "/gengar.png"),
-            m_assetManager.LoadTexture(renderer, RESOURCES_FOLDER + "/jigglypuff.png"),
-            m_assetManager.LoadTexture(renderer, RESOURCES_FOLDER + "/moltres.png"),
-            m_assetManager.LoadTexture(renderer, RESOURCES_FOLDER + "/squirtle.png"),
-            m_assetManager.LoadTexture(renderer, RESOURCES_FOLDER + "/ninetales.png"),
-            m_assetManager.LoadTexture(renderer, RESOURCES_FOLDER + "/poliwhirl.png"),
-            m_assetManager.LoadTexture(renderer, RESOURCES_FOLDER + "/charizard.png"),
-            m_assetManager.LoadTexture(renderer, RESOURCES_FOLDER + "/gengar.png"),
-            m_assetManager.LoadTexture(renderer, RESOURCES_FOLDER + "/jigglypuff.png"),
-            m_assetManager.LoadTexture(renderer, RESOURCES_FOLDER + "/moltres.png"),
-            m_assetManager.LoadTexture(renderer, RESOURCES_FOLDER + "/squirtle.png"),
-            m_assetManager.LoadTexture(renderer, RESOURCES_FOLDER + "/ninetales.png"),
-            m_assetManager.LoadTexture(renderer, RESOURCES_FOLDER + "/poliwhirl.png"),
-            m_assetManager.LoadTexture(renderer, RESOURCES_FOLDER + "/charizard.png"),
-            m_assetManager.LoadTexture(renderer, RESOURCES_FOLDER + "/gengar.png"),
-            m_assetManager.LoadTexture(renderer, RESOURCES_FOLDER + "/jigglypuff.png"),
-            m_assetManager.LoadTexture(renderer, RESOURCES_FOLDER + "/moltres.png"),
-            m_assetManager.LoadTexture(renderer, RESOURCES_FOLDER + "/squirtle.png"),
-            m_assetManager.LoadTexture(renderer, RESOURCES_FOLDER + "/ninetales.png"),
-            m_assetManager.LoadTexture(renderer, RESOURCES_FOLDER + "/poliwhirl.png"),
-        };
-
-        for (var i = 0; i < m_spriteTexturePokemans.Length; i++)
-        {
-            var width = m_spriteTexturePokemans[i].Width;
-            var height = m_spriteTexturePokemans[i].Height;
-            int row = i / 10;
-            int col = i % 10;
-            var spacing = -20;
-            var startPos = new Vector2(330 + (col * (width + spacing)), 0 + (row * (height + spacing)));
-
-            // var startPos = new Vector2(150 + (i*width + width + 64), 60 * j+i);
-            var rec = new SDL.SDL_Rect { x = (int)startPos.X, y = (int)startPos.Y, w = width, h = height };
-            m_dstRects.Add(rec);
-            m_currScales.Add(1.0f);
-            m_originalScales.Add(new Vector2(width, height));
-        }
-    }
-
-    public void Update()
-    {
-        if (InputManager.IsKeyPressed(SDL.SDL_Keycode.SDLK_w))
-            m_position.Y -= 20f * Time.DeltaTime;
-        if (InputManager.IsKeyPressed(SDL.SDL_Keycode.SDLK_a))
-            m_position.X -= 20f * Time.DeltaTime;
-        if (InputManager.IsKeyPressed(SDL.SDL_Keycode.SDLK_s))
-            m_position.Y += 20f * Time.DeltaTime;
-        if (InputManager.IsKeyPressed(SDL.SDL_Keycode.SDLK_d))
-            m_position.X += 20f * Time.DeltaTime;
-
-        if (m_dstRectAsh.x != (int)m_position.X || m_dstRectAsh.y != (int)m_position.Y)
-        {
-            m_dstRectAsh.x = (int)(m_position.X);
-            m_dstRectAsh.y = (int)(m_position.Y);
-        }
-    }
-    
-    public void Render(nint renderer)
-    {
-        var baseScale = 0.75f;
-        var amplitude = 0f;
+        private const string RESOURCES_FOLDER = "/home/anon/Repos/SDL_Engine/SDL2Engine/resources";
+        private const int POKEMON_MULTIPLIER = 20;
         
-        // Hopefully grab vocals from these bands
-        for (var i = 4; i < 16; i++)
+        private readonly IServiceAudioLoader m_audioLoader;
+        private readonly IServiceAssetManager m_assetManager;
+        private readonly IServiceCameraService m_cameraService;
+
+        private Pokemon m_ash;
+        private List<Pokemon> m_pokemonList = new List<Pokemon>();
+
+        private Vector2 m_originalScaleAsh;
+        private float m_currentScaleAsh;
+
+        public Pokemanz(IServiceAudioLoader audioLoader,
+                        IServiceAssetManager assetManager,
+                        IServiceCameraService cameraService)
         {
-            var index = i.ToString();
-            amplitude += m_audioLoader.GetAmplitudeByName(index);
+            m_audioLoader = audioLoader;
+            m_assetManager = assetManager;
+            m_cameraService = cameraService;
+        }
+        
+        public void Initialize(nint renderer)
+        {
+            var ashTexture = m_assetManager.LoadTexture(renderer, RESOURCES_FOLDER + "/ashh.png");
+            m_ash = new Pokemon(
+                name: "Ash",
+                textureId: ashTexture.Id,
+                originalWidth: ashTexture.Width,
+                originalHeight: ashTexture.Height,
+                initialPosition: new Vector2(48, 174)
+            );
+
+            m_originalScaleAsh = new Vector2(ashTexture.Width, ashTexture.Height);
+
+            var texturePaths = new[]
+            {
+                "/charizard.png", "/gengar.png", "/jigglypuff.png", "/moltres.png",
+                "/squirtle.png",  "/ninetales.png","/poliwhirl.png"
+            };
+
+            var allTextures = new List<AssetManager.TextureData>();
+            for (int r = 0; r < POKEMON_MULTIPLIER; r++) 
+            {
+                foreach (var path in texturePaths)
+                {
+                    var tex = m_assetManager.LoadTexture(renderer, RESOURCES_FOLDER + path);
+                    allTextures.Add(tex);
+                }
+            }
+
+            for (int i = 0; i < allTextures.Count; i++)
+            {
+                var texData = allTextures[i];
+                int row = i / 10;
+                int col = i % 10;
+                var spacing = -20;
+
+                var startPos = new Vector2(
+                    330 + (col * (texData.Width + spacing)), 
+                    0 + (row * (texData.Height + spacing))
+                );
+
+                var pokeObj = new Pokemon(
+                    name: $"Pokemon_{i}",
+                    textureId: texData.Id,
+                    originalWidth: texData.Width,
+                    originalHeight: texData.Height,
+                    initialPosition: startPos
+                );
+
+                m_pokemonList.Add(pokeObj);
+            }
         }
 
-        var scaleFactor = baseScale + amplitude; 
-        m_currentScale = MathHelper.Lerp(m_currentScale, scaleFactor, 0.1f);
-        var maxScale = 3f;
-        m_currentScale = Math.Min(m_currentScale, maxScale);
-        m_dstRectAsh.w = (int)(m_originalScale.X * m_currentScale);
-        m_dstRectAsh.h = (int)(m_originalScale.Y * m_currentScale);
-
-        var pokemansBaseScale = 0.5f;
-        var pokemansMaxScale = 5f;
-
-        for (var i = 0; i < m_spriteTexturePokemans.Length; i++)
+        public void Update()
         {
-            var pulseOffset = (i * 0.5f) % MathHelper.TwoPi;
+            float deltaTime = Time.DeltaTime;
+
+            if (InputManager.IsKeyPressed(SDL.SDL_Keycode.SDLK_w))
+                m_ash.Position = new Vector2(m_ash.Position.X, m_ash.Position.Y - 20f * deltaTime);
+            if (InputManager.IsKeyPressed(SDL.SDL_Keycode.SDLK_a))
+                m_ash.Position = new Vector2(m_ash.Position.X - 20f * deltaTime, m_ash.Position.Y);
+            if (InputManager.IsKeyPressed(SDL.SDL_Keycode.SDLK_s))
+                m_ash.Position = new Vector2(m_ash.Position.X, m_ash.Position.Y + 20f * deltaTime);
+            if (InputManager.IsKeyPressed(SDL.SDL_Keycode.SDLK_d))
+                m_ash.Position = new Vector2(m_ash.Position.X + 20f * deltaTime, m_ash.Position.Y);
+
+            m_ash.Update(deltaTime);
+
+            foreach (var pokemon in m_pokemonList)
+            {
+                pokemon.Update(deltaTime);
+            }
+        }
+        
+        public void Render(nint renderer)
+        {
+            float baseScale = 0.75f;
+            float amplitude = 0f;
             
-            // Grab low freq band for the bass
-            var dynamicScaleFactor = pokemansBaseScale
-                                     + m_audioLoader.GetAmplitudeByName("1") + m_audioLoader.GetAmplitudeByName("0")
-                                     * (5f + (float)Math.Sin(Time.TotalTime + pulseOffset));
+            for (int i = 4; i < 16; i++)
+            {
+                amplitude += m_audioLoader.GetAmplitudeByName(i.ToString());
+            }
 
-            m_currScales[i] = MathHelper.Lerp(m_currScales[i], dynamicScaleFactor, 0.1f);
-            m_currScales[i] = Math.Min(m_currScales[i], pokemansMaxScale);
-            var ogScale = m_originalScales[i];
-            var bounceX = 10f * (float)Math.Sin(Time.TotalTime * 2f + i * 0.5f);
-            var bounceY = 5f * (float)Math.Cos(Time.TotalTime * 3f + i * 0.3f);
-            var rec = m_dstRects[i];
-            rec.w = (int)(ogScale.X * m_currScales[i]);
-            rec.h = (int)(ogScale.Y * m_currScales[i]);
-            rec.x += (int)bounceX;
-            rec.y += (int)bounceY;
-            var camera = m_cameraService.GetActiveCamera();
-            m_assetManager.DrawTexture(renderer, m_spriteTexturePokemans[i].Id, ref rec, camera);
+            float scaleFactor = baseScale + amplitude;
+            m_currentScaleAsh = MathHelper.Lerp(m_currentScaleAsh, scaleFactor, 0.1f);
+            m_currentScaleAsh = Math.Min(m_currentScaleAsh, 3f);
+
+            float normalizedAshScale = m_currentScaleAsh; 
+            m_ash.Scale = new Vector2(normalizedAshScale, normalizedAshScale);
+            m_ash.Render(renderer, m_assetManager, m_cameraService);
+
+            float pokemansBaseScale = 0.5f;
+            float pokemansMaxScale = 5f;
+
+            for (int i = 0; i < m_pokemonList.Count; i++)
+            {
+                var pokemon = m_pokemonList[i];
+
+                // For “bass” amplitude
+                float bassAmplitude = m_audioLoader.GetAmplitudeByName("0") + m_audioLoader.GetAmplitudeByName("1");
+
+                float pulseOffset = (i * 0.5f) % MathHelper.TwoPi;
+                float dynamicScaleFactor = pokemansBaseScale 
+                                           + bassAmplitude 
+                                           * (5f + (float)System.Math.Sin(Time.TotalTime + pulseOffset));
+
+                Vector2 targetScale = new Vector2(dynamicScaleFactor, dynamicScaleFactor);
+                pokemon.Scale = Vector2.Lerp(pokemon.Scale, targetScale, 0.1f);
+
+                float bounceX = 10f * (float)System.Math.Sin(Time.TotalTime * 2f + i * 0.5f);
+                float bounceY = 5f  * (float)System.Math.Cos(Time.TotalTime * 3f + i * 0.3f);
+
+                Vector2 originalPos = pokemon.Position;
+                pokemon.Position = new Vector2(originalPos.X + bounceX, originalPos.Y + bounceY);
+
+                pokemon.Render(renderer, m_assetManager, m_cameraService);
+
+                // pokemon.Position = originalPos;
+            }
         }
 
-        m_assetManager.DrawTexture(renderer, m_spriteTexture.Id, ref m_dstRectAsh);
-    }
-
-    public void CleanUp()
-    {
-        m_assetManager.UnloadTexture(m_spriteTexture.Id);
-        for (var i = 0; i < m_spriteTexturePokemans.Length; i++)
+        /// <summary>
+        /// Cleanup textures when done.
+        /// </summary>
+        public void CleanUp()
         {
-            m_assetManager.UnloadTexture(m_spriteTexturePokemans[i].Id);
+            if (m_ash.TextureId != 0)
+            {
+                m_assetManager.UnloadTexture(m_ash.TextureId);
+            }
+
+            foreach (var poke in m_pokemonList)
+            {
+                m_assetManager.UnloadTexture(poke.TextureId);
+            }
         }
     }
 }
