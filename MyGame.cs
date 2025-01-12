@@ -23,6 +23,7 @@ public class MyGame : IGame
 
     private const int ENGINE_VOLUME = 24; // 0 - 128
 
+    private IServiceWindowService m_windowService;
     private IServiceRenderService m_renderService;
     private IServiceAssetManager m_assetManager;
     private IServiceAudioLoader m_audioLoader;
@@ -40,8 +41,14 @@ public class MyGame : IGame
     private GameObject m_boxObject;
     private List<GameObject> m_boxes = new List<GameObject>();
     
+    private int m_prevWindowX, m_prevWindowY;
+    private bool isDragging = false;
+    private int dragStartX, dragStartY, prevMouseX, prevMouseY;
+    
     public void Initialize(IServiceProvider serviceProvider)
     {
+        m_windowService = serviceProvider.GetService<IServiceWindowService>() 
+                          ?? throw new InvalidOperationException("IServiceWindowService is required but not registered.");
         m_renderService = serviceProvider.GetService<IServiceRenderService>() 
                           ?? throw new InvalidOperationException("IServiceRenderService is required but not registered.");
         m_assetManager = serviceProvider.GetService<IServiceAssetManager>() 
@@ -88,6 +95,7 @@ public class MyGame : IGame
 
     public void Update(float deltaTime)
     {
+        HandleMouseDragAndApplyForce();
         // If space is pressed, spawn multiple boxes
         if (InputManager.IsKeyPressed(SDL.SDL_Keycode.SDLK_SPACE))
         {
@@ -137,6 +145,41 @@ public class MyGame : IGame
         }
 
         m_pokemonHandler.Update();
+    }
+
+    public void HandleMouseDragAndApplyForce()
+    {
+        int mouseX, mouseY;
+        SDL.SDL_GetMouseState(out mouseX, out mouseY);
+
+        if (InputManager.IsMouseButtonPressed(SDL.SDL_BUTTON_LEFT) && !isDragging)
+        {
+            isDragging = true;
+            dragStartX = mouseX;
+            dragStartY = mouseY;
+            prevMouseX = mouseX;
+            prevMouseY = mouseY;
+        }
+
+        if (isDragging)
+        {
+            int deltaX = mouseX - prevMouseX;
+            int deltaY = mouseY - prevMouseY;
+
+            foreach (var box in m_boxes)
+            {
+                Vector2 force = new Vector2(deltaX, deltaY);
+                box.PhysicsBody.ApplyForce(force, box.PhysicsBody.GetWorldCenter(), true);
+            }
+
+            prevMouseX = mouseX;
+            prevMouseY = mouseY;
+        }
+
+        if (!InputManager.IsMouseButtonPressed(SDL.SDL_BUTTON_LEFT) && isDragging)
+        {
+            isDragging = false;
+        }
     }
 
     public void Render()
