@@ -5,12 +5,12 @@ using SDL2Engine.Core.Addressables.Interfaces;
 using SDL2Engine.Core.Input;
 using SDL2Engine.Core.Rendering.Interfaces;
 using SDL2Game.Core.Pokemans.GameObjects;
+using SDL2Game.Core.Utils;
 
 namespace SDL2Game.Core.Pokemans
 {
     public class PokemonHandler
     {
-        private const string RESOURCES_FOLDER = "/home/anon/Repos/SDL_Engine/SDL2Engine/resources";
         private const int POKEMON_MULTIPLIER = 20;
         
         private readonly IServiceAudioLoader m_audioLoader;
@@ -33,7 +33,7 @@ namespace SDL2Game.Core.Pokemans
         
         public void Initialize(nint renderer)
         {
-            var ashTexture = m_assetManager.LoadTexture(renderer, RESOURCES_FOLDER + "/ashh.png");
+            var ashTexture = m_assetManager.LoadTexture(renderer, GameHelper.RESOURCES_FOLDER + "/ashh.png");
             m_ash = new Pokemon(
                 name: "Ash",
                 textureId: ashTexture.Id,
@@ -53,7 +53,7 @@ namespace SDL2Game.Core.Pokemans
             {
                 foreach (var path in texturePaths)
                 {
-                    var tex = m_assetManager.LoadTexture(renderer, RESOURCES_FOLDER + path);
+                    var tex = m_assetManager.LoadTexture(renderer, GameHelper.RESOURCES_FOLDER + path);
                     allTextures.Add(tex);
                 }
             }

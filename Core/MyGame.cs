@@ -15,16 +15,16 @@ using SDL2Engine.Core.Utils;
 using SDL2Engine.Core.Windowing.Interfaces;
 using SDL2Game.Core.AudioSynth;
 using SDL2Game.Core.Gui;
+using SDL2Game.Core.Physics;
 using SDL2Game.Core.Pokemans;
+using SDL2Game.Core.Utils;
 
 namespace SDL2Game.Core;
 
 public class MyGame : IGame
 {
-    private const string RESOURCES_FOLDER = "/home/anon/Repos/SDL_Engine/SDL2Engine/resources";
-    private const string SOUND_FOLDER = "/home/anon/Music";
 
-    private const int ENGINE_VOLUME = 24; // 0 - 128
+    #region Services
 
     private IServiceWindowService m_windowService;
     private IServiceRenderService m_renderService;
@@ -38,23 +38,19 @@ public class MyGame : IGame
     private IServicePhysicsService m_physicsService;
     private IServiceSysInfo m_sysInfo;
 
+    #endregion
+
     private PokemonHandler m_pokemonHandler;
     private AudioSynthesizer m_audioSynthesizer;
-    private GuiTest m_guiTest;
-    
+    private GuiExample m_guiExample;
+    private PhysicsExample m_physicsExample;
+
     private float minHue = 0.7f, maxHue = 0.85f;
     private float maxHueSeperation = 0.25f;
-    
-    // Physics gameobject
-    private GameObject m_boxObject;
-    private List<GameObject> m_boxes = new List<GameObject>();
-    
-    private int m_prevWindowX, m_prevWindowY;
-    private bool isDragging = false;
-    private int dragStartX, dragStartY, prevMouseX, prevMouseY;
 
     public void Initialize(IServiceProvider serviceProvider)
     {
+        #region Setup Services
         m_windowService = serviceProvider.GetService<IServiceWindowService>() ?? throw new InvalidOperationException("IServiceWindowService is required but not registered.");
         m_renderService = serviceProvider.GetService<IServiceRenderService>() ?? throw new InvalidOperationException("IServiceRenderService is required but not registered.");
         m_guiRenderService = serviceProvider.GetService<IServiceGuiRenderService>() ?? throw new InvalidOperationException("IServiceGuiRenderService is required but not registered.");
@@ -66,90 +62,36 @@ public class MyGame : IGame
         m_sysInfo = serviceProvider.GetService<IServiceSysInfo>() ?? throw new InvalidOperationException("IServiceSysInfo is required but not registered.");
         m_guiWindowBuilder = serviceProvider.GetService<IServiceGuiWindowBuilder>() ?? throw new InvalidOperationException("IServiceGuiWindowBuilder is required but not registered.");
         m_guiVarBinder = serviceProvider.GetService<IVariableBinder>() ?? throw new InvalidOperationException("IVariableBinder is required but not registered.");
-        
+        #endregion
+
         InitializeInternal();
         Debug.Log("Initialized MyGame!");
     }
 
     private void InitializeInternal()
     {
-        m_guiTest = new GuiTest(m_guiRenderService, m_guiWindowBuilder, m_guiVarBinder, m_sysInfo);
-
+        m_guiExample = new GuiExample(m_guiRenderService, m_guiWindowBuilder, m_guiVarBinder, m_sysInfo);
+        m_physicsExample = new PhysicsExample(m_physicsService, m_renderService, m_assetManager, m_windowConfig);
         m_pokemonHandler = new PokemonHandler(m_audioLoader, m_assetManager, m_cameraService);
-        m_pokemonHandler.Initialize(m_renderService.RenderPtr);
-
         m_audioSynthesizer = new AudioSynthesizer(
             m_windowConfig.Settings.Width,
             m_windowConfig.Settings.Height,
             m_audioLoader);
-        
+
+        m_pokemonHandler.Initialize(m_renderService.RenderPtr);
         m_audioSynthesizer.Initialize(rectWidth: 4, rectMaxHeight: 75, rectSpacing: 4, bandIntensity: 3f);
-        
-        var songPath = SOUND_FOLDER + "/pokemon.wav"; //"/skidrow-portal.wav"; 
 
-        // Music Test
-        // var song = m_assetManager.LoadSound(songPath, Addressables.AudioLoader.AudioType.Music);
-        // m_assetManager.PlaySound(song, 16, true);
-
-        // Soundfx Test
+        var songPath = GameHelper.SOUND_FOLDER + "/skidrow-portal.wav";//"/pokemon.wav";  
         var song = m_assetManager.LoadSound(songPath);
-        m_assetManager.PlaySound(song, ENGINE_VOLUME);
-        
+        m_assetManager.PlaySound(song, GameHelper.GLOBAL_VOLUME);
     }
 
     public void Update(float deltaTime)
     {
-        HandleMouseDragAndApplyForce();
-        // If space is pressed, spawn multiple boxes
-        if (InputManager.IsKeyPressed(SDL.SDL_Keycode.SDLK_SPACE))
-        {
-            Debug.Log("<color=yellow>SPACE pressed! Spawning 10 'jigglypuff' boxes...</color>");
-
-            var boxTexture = m_assetManager.LoadTexture(m_renderService.RenderPtr, RESOURCES_FOLDER + "/jigglypuff.png");
-            Debug.Log($"Loaded Texture Id: {boxTexture.Id}, Size: {boxTexture.Width}x{boxTexture.Height}");
-
-            var rnd = new Random();
-            int numberOfBoxes = 10;
-            for (int i = 0; i < numberOfBoxes; i++)
-            {
-                float xPos = rnd.Next(50, m_windowConfig.Settings.Width - 50);
-                float yPos = 100; // start them near the top
-
-                var boxObject = new GameObject
-                {
-                    TextureId = boxTexture.Id,
-                    Position = new Vector2(xPos, yPos),
-                    OriginalWidth = boxTexture.Width,
-                    OriginalHeight = boxTexture.Height,
-                    Scale = Vector2.One
-                };
-
-                float widthMeters = boxObject.OriginalWidth / 3;
-                float heightMeters = boxObject.OriginalHeight / 3;
-
-                Debug.Log($"Box #{i} -> Pos({xPos}, {yPos}), Size({widthMeters}x{heightMeters}), Registering as DynamicBody...");
-
-                m_physicsService.RegisterGameObject(
-                    boxObject,
-                    widthMeters,
-                    heightMeters,
-                    BodyType.DynamicBody
-                );
-                m_guiTest.UpdatePokemonCount(1);
-                m_boxes.Add(boxObject);
-                Debug.Log($"Box #{i} registered successfully!");
-            }
-            Debug.Log("<color=yellow>Done spawning boxes!</color>");
-        }
-
-        foreach (var box in m_boxes)
-        {
-            box.Update(deltaTime);
-        }
-
+        m_physicsExample.Update(deltaTime, m_guiExample);
         m_pokemonHandler.Update(deltaTime);
     }
-    
+
     public void Render()
     {
         minHue += Time.DeltaTime * 0.01f;
@@ -160,61 +102,17 @@ public class MyGame : IGame
         if (minHue > maxHue - maxHueSeperation) minHue = maxHue - maxHueSeperation;
 
         m_pokemonHandler.Render(m_renderService.RenderPtr);
-        
-        foreach (var box in m_boxes)
-        {
-            box.Render(m_renderService.RenderPtr, m_assetManager);
-        }
-        
+        m_physicsExample.Render(m_renderService.RenderPtr);
         m_audioSynthesizer.Render(m_renderService.RenderPtr, minHue, maxHue);
     }
 
     public void RenderGui()
     {
-       
-        m_guiTest.RenderGui();
+        m_guiExample.RenderGui();
     }
 
     public void Shutdown()
     {
         m_pokemonHandler.CleanUp();
     }
-    
-    private void HandleMouseDragAndApplyForce()
-    {
-        int mouseX, mouseY;
-        SDL.SDL_GetMouseState(out mouseX, out mouseY);
-
-        if (InputManager.IsMouseButtonPressed(SDL.SDL_BUTTON_LEFT) && !isDragging)
-        {
-            isDragging = true;
-            dragStartX = mouseX;
-            dragStartY = mouseY;
-            prevMouseX = mouseX;
-            prevMouseY = mouseY;
-        }
-
-        if (isDragging)
-        {
-            int deltaX = mouseX - prevMouseX;
-            int deltaY = mouseY - prevMouseY;
-
-            for (var index = 0; index < m_boxes.Count; index++)
-            {
-                if (index > 20) break;
-                var box = m_boxes[index];
-                Vector2 force = new Vector2(deltaX, deltaY);
-                box.PhysicsBody.ApplyForce(force, box.PhysicsBody.GetWorldCenter(), true);
-            }
-
-            prevMouseX = mouseX;
-            prevMouseY = mouseY;
-        }
-
-        if (!InputManager.IsMouseButtonPressed(SDL.SDL_BUTTON_LEFT) && isDragging)
-        {
-            isDragging = false;
-        }
-    }
-
 }

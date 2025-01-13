@@ -3,11 +3,12 @@ using SDL2Engine.Core.CoreSystem.Configuration;
 using SDL2Engine.Core.GuiRenderer;
 using SDL2Engine.Core.GuiRenderer.Helpers;
 using SDL2Engine.Core.GuiRenderer.Interfaces;
+using SDL2Engine.Core.Input;
 using SDL2Engine.Core.Utils;
 
 namespace SDL2Game.Core.Gui;
 
-public class GuiTest
+public class GuiExample
 {
     private bool m_showDebugConsole;
     private IServiceSysInfo m_sysInfo;
@@ -16,9 +17,11 @@ public class GuiTest
     private IVariableBinder m_variableBinder;
 
     private ImGuiDockData m_guiDockerData;
+    
+    private string[] m_debugQueryData;
     private int m_pokemonCount;
     
-    public GuiTest(IServiceGuiRenderService guiRenderService, IServiceGuiWindowBuilder guiWindowBuilder, IVariableBinder guiVarBinder, IServiceSysInfo sysInfo)
+    public GuiExample(IServiceGuiRenderService guiRenderService, IServiceGuiWindowBuilder guiWindowBuilder, IVariableBinder guiVarBinder, IServiceSysInfo sysInfo)
     {
         m_sysInfo = sysInfo;
         m_guiRenderService = guiRenderService;
@@ -51,20 +54,38 @@ public class GuiTest
 
         m_guiWindowBuilder.BeginWindow(m_guiDockerData.BottomDock.Name);
             m_guiWindowBuilder.Draw("PokemonCount");
-        m_guiWindowBuilder.EndWindow();
+            for (var i = 0; i < m_debugQueryData.Length; i++)
+                m_guiWindowBuilder.Draw($"{m_debugQueryData[i]}_{i}");
+            m_guiWindowBuilder.EndWindow();
     }
     
     private void Initialize()
     {
-        
         m_variableBinder.BindVariable("PokemonCount", m_pokemonCount);
+        BindDebugQuery();
     }
 
+    private void BindDebugQuery()
+    {
+        for (var i = 0; i < m_debugQueryData.Length; i++)
+        {
+            var str = m_debugQueryData[i];
+            m_variableBinder.BindVariable($"{str}_{i}", str);
+        }
+    }
+
+    public void UpdateDebugQuery(string[] debugQuery)
+    {
+        m_debugQueryData = debugQuery;
+        BindDebugQuery();
+    }
+    
     public void UpdatePokemonCount(int addPokemonCount)
     {
         m_pokemonCount += addPokemonCount;
         m_variableBinder.BindVariable("PokemonCount", m_pokemonCount);
     }
+    
     private void RenderFileMenu()
     {
         if (ImGui.BeginMainMenuBar())
@@ -97,7 +118,7 @@ public class GuiTest
             }
 
             var fps = $"Fps: {Time.Fps:F2} (delta: {Time.DeltaTime:F2})";
-            var fullHeader = $"Driver: {m_sysInfo.SDLRenderInfo.CurrentRenderDriver} {fps}";
+            var fullHeader = $"Mouse: {InputManager.MouseX}x{InputManager.MouseY} Driver: {m_sysInfo.SDLRenderInfo.CurrentRenderDriver} {fps}";
             var windowWidth = ImGui.GetWindowWidth();
             var textWidth = ImGui.CalcTextSize(fullHeader).X;
             ImGui.SameLine(windowWidth - textWidth - ImGui.GetStyle().ItemSpacing.X * 2);
