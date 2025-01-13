@@ -11,7 +11,7 @@ namespace SDL2Game.Core.Pokemans
 {
     public class PokemonHandler
     {
-        private const int POKEMON_MULTIPLIER = 20;
+        private const int POKEMON_MULTIPLIER = 2;
         
         private readonly IServiceAudioLoader m_audioLoader;
         private readonly IServiceAssetManager m_assetManager;

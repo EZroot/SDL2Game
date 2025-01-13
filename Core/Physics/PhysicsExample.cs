@@ -60,28 +60,48 @@ public class PhysicsExample
 
     private void MouseQueryCollision(int mouseX, int mouseY, GuiExample example)
     {
+        var bodyInfo = new Dictionary<string, List<(string Property, string Value)>>()
+        {
+            {
+                "General State", new List<(string, string)>
+                {
+                    ("NA", "NA")
+                }
+            },
+        };
+
         var body = m_physicsService.CollisionDetector.GetBodyUnderPoint(mouseX, mouseY);
         if (body != null)
         {
-            var bodyInfo = new string[,]
+            bodyInfo = new Dictionary<string, List<(string Property, string Value)>>()
             {
-                { "IsEnabled", body.IsEnabled.ToString() },
-                { "IsAwake", body.IsAwake.ToString() },
-                { "IsBullet", body.IsBullet.ToString() },
-                { "BodyType", body.BodyType.ToString() },
-                { "Mass", body.Mass.ToString() },
-                { "Inertia", body.Inertia.ToString() },
-                { "AngularDamping", body.AngularDamping.ToString() },
-                { "AngularVelocity", body.AngularVelocity.ToString() },
-                { "LinearDamping", body.LinearDamping.ToString() },
-                { "LinearVelocity", body.LinearVelocity.ToString() }
+                { "General State", new List<(string, string)>
+                    {
+                        ("IsEnabled", body.IsEnabled.ToString()),
+                        ("IsAwake", body.IsAwake.ToString()),
+                        ("IsBullet", body.IsBullet.ToString()),
+                        ("BodyType", body.BodyType.ToString())
+                    }
+                },
+                { "Physical Properties", new List<(string, string)>
+                    {
+                        ("Mass", body.Mass.ToString()),
+                        ("Inertia", body.Inertia.ToString()),
+                    }
+                },
+                { "Dynamic Properties", new List<(string, string)>
+                    {
+                        ("AngularDamping", body.AngularDamping.ToString()),
+                        ("AngularVelocity", body.AngularVelocity.ToString()),
+                        ("LinearDamping", body.LinearDamping.ToString()),
+                        ("LinearVelocity", body.LinearVelocity.ToString())
+                    }
+                }
             };
-            example.UpdateDebugQuery(bodyInfo);
+
         }
-        else
-        {
-            example.UpdateDebugQuery(new string[,] { {"None","N/A"}});
-        }
+
+        example.UpdateDebugQuery(bodyInfo);
     }
 
     private void SpawnBoxes(GuiExample guiExample)

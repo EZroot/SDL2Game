@@ -18,7 +18,7 @@ public class GuiExample
 
     private ImGuiDockData m_guiDockerData;
     
-    private string[,] m_debugQueryData;
+    private  Dictionary<string, List<(string Property, string Value)>> m_debugQueryData;
     private int m_pokemonCount;
     
     private ImGuiTableData m_tableData;
@@ -63,14 +63,13 @@ public class GuiExample
 
     private void Initialize()
     {
-        InitializeTable();
         m_variableBinder.BindVariable<ImGuiTableData>("Table", m_tableData);
         m_variableBinder.BindVariable("CellTableData", m_cellTableData);
         m_variableBinder.BindVariable("PokemonCount", m_pokemonCount);
         BindDebugQuery();
     }
 
-    public void UpdateDebugQuery(string[,] debugQuery)
+    public void UpdateDebugQuery( Dictionary<string, List<(string Property, string Value)>> debugQuery)
     {
         m_debugQueryData = debugQuery;
         BindDebugQuery();
@@ -81,60 +80,34 @@ public class GuiExample
         m_pokemonCount += addPokemonCount;
         m_variableBinder.BindVariable("PokemonCount", m_pokemonCount);
     }
-    
     private void BindDebugQuery()
     {
         var tableFlags = ImGuiTableFlags.None;
         var labelOnRight = true;
-        var tableCells = new ImGuiInputData[m_debugQueryData.GetLength(0)];
-        var tableColumn = new ImGuiColumnData[m_debugQueryData.GetLength(0)];
-        
-        for (var i = 0; i < m_debugQueryData.GetLength(0); i++)
+        var cells = new List<ImGuiCellData>();
+
+        foreach (var item in m_debugQueryData)
         {
-            var header = m_debugQueryData[i, 0];
-            var value = m_debugQueryData[i, 1]; 
-            tableCells[i] = new ImGuiInputData(header, value, true);
-            // tableColumn[i] = new ImGuiColumnData(header, tableCells[i]);
+            string header = item.Key; // The header from the dictionary key
+            List<(string Property, string Value)> properties = item.Value;
+        
+            // Build a flat list of strings from the list of tuples
+            List<string> values = new List<string>();
+            foreach (var prop in properties)
+            {
+                values.Add($"{prop.Property}: {prop.Value}");
+            }
+
+            cells.Add(new ImGuiCellData(header, values.ToArray()));
         }
 
-        tableColumn = new[] { new ImGuiColumnData("Gameobject", tableCells) };
-        m_tableData = new ImGuiTableData(
-            tableFlags,
-            labelOnRight,
-            tableColumn);
-        
-        m_variableBinder.BindVariable("Table", m_tableData);
+        // Assuming ImGuiCellData and ImGuiCellTableData can accept an array of cells directly
+        var cellTableData = new ImGuiCellTableData(cells.ToArray());
+
+        // Update the binding with the new table structure
+        m_variableBinder.BindVariable("CellTableData", cellTableData);
     }
 
-    private void InitializeTable()
-    {
-        // Table
-        var tableInputData = new ImGuiInputData("Alice", "Alice", true);
-        var tableInputData1 = new ImGuiInputData("Bob", "Bob", true);
-        var tableInputData2 = new ImGuiInputData("Charlie", "Charlie", true);
-        var tableInputData3 = new ImGuiInputData("30", "30", true);
-        var tableInputData4 = new ImGuiInputData("25", "25", true);
-        var tableInputData5 = new ImGuiInputData("22", "22", true);
-        var tableInputData6 = new ImGuiInputData("Engineer", "Engineer", true);
-        var tableInputData7 = new ImGuiInputData("Designer", "Designer", true);
-        var tableInputData8 = new ImGuiInputData("Manager", "Manager", true);
-        var tableFlags = ImGuiTableFlags.None;
-        var labelOnRight = true;
-        
-        m_tableData = new ImGuiTableData(
-            tableFlags,
-            labelOnRight,
-            new ImGuiColumnData("Name", tableInputData, tableInputData1, tableInputData2),
-            new ImGuiColumnData("Age", tableInputData3, tableInputData4, tableInputData5),
-            new ImGuiColumnData("Ocupation", tableInputData6, tableInputData7, tableInputData8)
-        );
-        
-        ImGuiCellData someCell = new ImGuiCellData("First","a","b","c");
-        ImGuiCellData someCell1 = new ImGuiCellData("Second", "d","e","f");
-        ImGuiCellData someCell2 = new ImGuiCellData("Third", "g","h","i");
-        m_cellTableData = new ImGuiCellTableData(someCell, someCell1, someCell2);
-    }
-    
     private void RenderFileMenu()
     {
         if (ImGui.BeginMainMenuBar())
