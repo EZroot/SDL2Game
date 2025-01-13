@@ -18,7 +18,7 @@ public class GuiExample
 
     private ImGuiDockData m_guiDockerData;
     
-    private string[] m_debugQueryData;
+    private string[,] m_debugQueryData;
     private int m_pokemonCount;
     
     private ImGuiTableData m_tableData;
@@ -39,7 +39,7 @@ public class GuiExample
             new DockPanelData("Bottom Dock", false),
             hasFileMenu: true);
     }
-    
+
     public void RenderGui()
     {
         if (m_guiDockerData.IsDockInitialized == false)
@@ -49,21 +49,18 @@ public class GuiExample
         }
 
         m_guiRenderService.RenderFullScreenDockSpace(m_guiDockerData);
-        
         RenderFileMenu();
-        
+
         if (m_showDebugConsole)
             Debug.RenderDebugConsole(ref m_showDebugConsole);
 
         m_guiWindowBuilder.BeginWindow(m_guiDockerData.BottomDock.Name);
-            m_guiWindowBuilder.Draw("PokemonCount");
-            for (var i = 0; i < m_debugQueryData.Length; i++)
-                m_guiWindowBuilder.Draw($"{m_debugQueryData[i]}_{i}");
-            m_guiWindowBuilder.Draw("Table");
-            m_guiWindowBuilder.Draw("CellTableData");
-            m_guiWindowBuilder.EndWindow();
+        m_guiWindowBuilder.Draw("PokemonCount");
+        m_guiWindowBuilder.Draw("Table");
+        m_guiWindowBuilder.Draw("CellTableData");
+        m_guiWindowBuilder.EndWindow();
     }
-    
+
     private void Initialize()
     {
         InitializeTable();
@@ -73,16 +70,7 @@ public class GuiExample
         BindDebugQuery();
     }
 
-    private void BindDebugQuery()
-    {
-        for (var i = 0; i < m_debugQueryData.Length; i++)
-        {
-            var str = m_debugQueryData[i];
-            m_variableBinder.BindVariable($"{str}_{i}", str);
-        }
-    }
-
-    public void UpdateDebugQuery(string[] debugQuery)
+    public void UpdateDebugQuery(string[,] debugQuery)
     {
         m_debugQueryData = debugQuery;
         BindDebugQuery();
@@ -93,21 +81,46 @@ public class GuiExample
         m_pokemonCount += addPokemonCount;
         m_variableBinder.BindVariable("PokemonCount", m_pokemonCount);
     }
+    
+    private void BindDebugQuery()
+    {
+        var tableFlags = ImGuiTableFlags.None;
+        var labelOnRight = true;
+        var tableCells = new ImGuiInputData[m_debugQueryData.GetLength(0)];
+        var tableColumn = new ImGuiColumnData[m_debugQueryData.GetLength(0)];
+        
+        for (var i = 0; i < m_debugQueryData.GetLength(0); i++)
+        {
+            var header = m_debugQueryData[i, 0];
+            var value = m_debugQueryData[i, 1]; 
+            tableCells[i] = new ImGuiInputData(header, value, true);
+            // tableColumn[i] = new ImGuiColumnData(header, tableCells[i]);
+        }
+
+        tableColumn = new[] { new ImGuiColumnData("Gameobject", tableCells) };
+        m_tableData = new ImGuiTableData(
+            tableFlags,
+            labelOnRight,
+            tableColumn);
+        
+        m_variableBinder.BindVariable("Table", m_tableData);
+    }
 
     private void InitializeTable()
     {
         // Table
-        var tableInputData = new ImGuiInputData("Alice", "Alice");
-        var tableInputData1 = new ImGuiInputData("Bob", "Bob");
-        var tableInputData2 = new ImGuiInputData("Charlie", "Charlie");
+        var tableInputData = new ImGuiInputData("Alice", "Alice", true);
+        var tableInputData1 = new ImGuiInputData("Bob", "Bob", true);
+        var tableInputData2 = new ImGuiInputData("Charlie", "Charlie", true);
         var tableInputData3 = new ImGuiInputData("30", "30", true);
         var tableInputData4 = new ImGuiInputData("25", "25", true);
         var tableInputData5 = new ImGuiInputData("22", "22", true);
-        var tableInputData6 = new ImGuiInputData("Engineer", "Engineer");
+        var tableInputData6 = new ImGuiInputData("Engineer", "Engineer", true);
         var tableInputData7 = new ImGuiInputData("Designer", "Designer", true);
-        var tableInputData8 = new ImGuiInputData("Manager", "Manager");
+        var tableInputData8 = new ImGuiInputData("Manager", "Manager", true);
         var tableFlags = ImGuiTableFlags.None;
         var labelOnRight = true;
+        
         m_tableData = new ImGuiTableData(
             tableFlags,
             labelOnRight,
@@ -115,6 +128,7 @@ public class GuiExample
             new ImGuiColumnData("Age", tableInputData3, tableInputData4, tableInputData5),
             new ImGuiColumnData("Ocupation", tableInputData6, tableInputData7, tableInputData8)
         );
+        
         ImGuiCellData someCell = new ImGuiCellData("First","a","b","c");
         ImGuiCellData someCell1 = new ImGuiCellData("Second", "d","e","f");
         ImGuiCellData someCell2 = new ImGuiCellData("Third", "g","h","i");

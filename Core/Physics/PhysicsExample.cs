@@ -63,20 +63,24 @@ public class PhysicsExample
         var body = m_physicsService.CollisionDetector.GetBodyUnderPoint(mouseX, mouseY);
         if (body != null)
         {
-            var bodyInfo = new string[]
+            var bodyInfo = new string[,]
             {
-                body.BodyType.ToString(),
-                body.Mass.ToString(),
-                body.Inertia.ToString(),
-                body.AngularDamping.ToString(),
-                body.AngularVelocity.ToString(),
-                body.LinearDamping.ToString(),
-                body.LinearVelocity.ToString(),
-                body.IsEnabled.ToString(),
-                body.IsAwake.ToString(),
-                body.IsBullet.ToString(),
+                { "IsEnabled", body.IsEnabled.ToString() },
+                { "IsAwake", body.IsAwake.ToString() },
+                { "IsBullet", body.IsBullet.ToString() },
+                { "BodyType", body.BodyType.ToString() },
+                { "Mass", body.Mass.ToString() },
+                { "Inertia", body.Inertia.ToString() },
+                { "AngularDamping", body.AngularDamping.ToString() },
+                { "AngularVelocity", body.AngularVelocity.ToString() },
+                { "LinearDamping", body.LinearDamping.ToString() },
+                { "LinearVelocity", body.LinearVelocity.ToString() }
             };
             example.UpdateDebugQuery(bodyInfo);
+        }
+        else
+        {
+            example.UpdateDebugQuery(new string[,] { {"None","N/A"}});
         }
     }
 
