@@ -7,6 +7,7 @@ using SDL2Engine.Core.Addressables.Interfaces;
 using SDL2Engine.Core.CoreSystem.Configuration;
 using SDL2Engine.Core.GuiRenderer;
 using SDL2Engine.Core.GuiRenderer.Helpers;
+using SDL2Engine.Core.GuiRenderer.Interfaces;
 using SDL2Engine.Core.Input;
 using SDL2Engine.Core.Physics.Interfaces;
 using SDL2Engine.Core.Rendering.Interfaces;
@@ -28,11 +29,14 @@ public class MyGame : IGame
     private IServiceWindowService m_windowService;
     private IServiceRenderService m_renderService;
     private IServiceGuiRenderService m_guiRenderService;
+    private IServiceGuiWindowBuilder m_guiWindowBuilder;
+    private IVariableBinder m_guiVarBinder;
     private IServiceAssetManager m_assetManager;
     private IServiceAudioLoader m_audioLoader;
     private IServiceWindowConfig m_windowConfig;
     private IServiceCameraService m_cameraService;
     private IServicePhysicsService m_physicsService;
+    private IServiceSysInfo m_sysInfo;
 
     private PokemonHandler m_pokemonHandler;
     private AudioSynthesizer m_audioSynthesizer;
@@ -49,40 +53,28 @@ public class MyGame : IGame
     private bool isDragging = false;
     private int dragStartX, dragStartY, prevMouseX, prevMouseY;
 
-    private ImGuiDockData m_dockData;
-    
     public void Initialize(IServiceProvider serviceProvider)
     {
-        m_windowService = serviceProvider.GetService<IServiceWindowService>() 
-                          ?? throw new InvalidOperationException("IServiceWindowService is required but not registered.");
-        m_renderService = serviceProvider.GetService<IServiceRenderService>() 
-                          ?? throw new InvalidOperationException("IServiceRenderService is required but not registered.");
-        m_guiRenderService = serviceProvider.GetService<IServiceGuiRenderService>() 
-                             ?? throw new InvalidOperationException("IServiceGuiRenderService is required but not registered.");
-        m_assetManager = serviceProvider.GetService<IServiceAssetManager>() 
-                         ?? throw new InvalidOperationException("IServiceAssetManager is required but not registered.");
-        m_audioLoader = serviceProvider.GetService<IServiceAudioLoader>() 
-                        ?? throw new InvalidOperationException("IServiceAudioLoader is required but not registered.");
-        m_cameraService = serviceProvider.GetService<IServiceCameraService>() 
-                          ?? throw new InvalidOperationException("IServiceCameraService is required but not registered.");
-        m_windowConfig = serviceProvider.GetService<IServiceWindowConfig>() 
-                         ?? throw new InvalidOperationException("IServiceWindowConfig is required but not registered.");
-        m_physicsService = serviceProvider.GetService<IServicePhysicsService>() 
-                           ?? throw new InvalidOperationException("IServicePhysicsService is required but not registered.");
-
-        Initialize();
+        m_windowService = serviceProvider.GetService<IServiceWindowService>() ?? throw new InvalidOperationException("IServiceWindowService is required but not registered.");
+        m_renderService = serviceProvider.GetService<IServiceRenderService>() ?? throw new InvalidOperationException("IServiceRenderService is required but not registered.");
+        m_guiRenderService = serviceProvider.GetService<IServiceGuiRenderService>() ?? throw new InvalidOperationException("IServiceGuiRenderService is required but not registered.");
+        m_assetManager = serviceProvider.GetService<IServiceAssetManager>() ?? throw new InvalidOperationException("IServiceAssetManager is required but not registered.");
+        m_audioLoader = serviceProvider.GetService<IServiceAudioLoader>() ?? throw new InvalidOperationException("IServiceAudioLoader is required but not registered.");
+        m_cameraService = serviceProvider.GetService<IServiceCameraService>() ?? throw new InvalidOperationException("IServiceCameraService is required but not registered.");
+        m_windowConfig = serviceProvider.GetService<IServiceWindowConfig>() ?? throw new InvalidOperationException("IServiceWindowConfig is required but not registered.");
+        m_physicsService = serviceProvider.GetService<IServicePhysicsService>() ?? throw new InvalidOperationException("IServicePhysicsService is required but not registered.");
+        m_sysInfo = serviceProvider.GetService<IServiceSysInfo>() ?? throw new InvalidOperationException("IServiceSysInfo is required but not registered.");
+        m_guiWindowBuilder = serviceProvider.GetService<IServiceGuiWindowBuilder>() ?? throw new InvalidOperationException("IServiceGuiWindowBuilder is required but not registered.");
+        m_guiVarBinder = serviceProvider.GetService<IVariableBinder>() ?? throw new InvalidOperationException("IVariableBinder is required but not registered.");
+        
+        InitializeInternal();
         Debug.Log("Initialized MyGame!");
     }
 
-    private void Initialize()
+    private void InitializeInternal()
     {
-        m_dockData = new ImGuiDockData(
-            new DockPanelData("Main Dock", true),
-            new DockPanelData("Left Dock", false),
-            new DockPanelData("Top Dock", false),
-            new DockPanelData("Right Dock", true),
-            new DockPanelData("Bottom Dock", false));
-        
+        m_guiTest = new GuiTest(m_guiRenderService, m_guiWindowBuilder, m_guiVarBinder, m_sysInfo);
+
         m_pokemonHandler = new PokemonHandler(m_audioLoader, m_assetManager, m_cameraService);
         m_pokemonHandler.Initialize(m_renderService.RenderPtr);
 
@@ -143,11 +135,10 @@ public class MyGame : IGame
                     heightMeters,
                     BodyType.DynamicBody
                 );
-
+                m_guiTest.UpdatePokemonCount(1);
                 m_boxes.Add(boxObject);
                 Debug.Log($"Box #{i} registered successfully!");
             }
-
             Debug.Log("<color=yellow>Done spawning boxes!</color>");
         }
 
@@ -180,9 +171,8 @@ public class MyGame : IGame
 
     public void RenderGui()
     {
-        if(m_dockData.IsDockInitialized == false)
-            m_dockData = m_guiRenderService.InitializeDockSpace(m_dockData);
-        m_guiRenderService.RenderFullScreenDockSpace(m_dockData);
+       
+        m_guiTest.RenderGui();
     }
 
     public void Shutdown()
