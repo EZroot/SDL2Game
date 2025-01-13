@@ -2,7 +2,7 @@ using SDL2;
 using SDL2Engine.Core.Addressables.Interfaces;
 using SDL2Engine.Events;
 
-namespace SDL2Game;
+namespace SDL2Game.Core.AudioSynth;
 
 public class AudioSynthesizer
 {

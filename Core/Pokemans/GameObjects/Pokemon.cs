@@ -1,10 +1,8 @@
 using System.Numerics;
-using SDL2Engine.Core;
 using SDL2Engine.Core.Addressables.Interfaces;
 using SDL2Engine.Core.Rendering.Interfaces;
-using SDL2Engine.Core.Utils;
 
-namespace SDL2Game.GameObjects
+namespace SDL2Game.Core.Pokemans.GameObjects
 {
     /// <summary>
     /// A specialized GameObject representing a Pokémon.

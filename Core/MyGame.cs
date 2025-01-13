@@ -3,18 +3,20 @@ using Box2DSharp.Dynamics;
 using Microsoft.Extensions.DependencyInjection;
 using SDL2;
 using SDL2Engine.Core;
-using SDL2Engine.Core.Addressables;
 using SDL2Engine.Core.Addressables.Interfaces;
 using SDL2Engine.Core.CoreSystem.Configuration;
 using SDL2Engine.Core.GuiRenderer;
-using SDL2Engine.Core.GuiRenderer.Interfaces;
+using SDL2Engine.Core.GuiRenderer.Helpers;
 using SDL2Engine.Core.Input;
 using SDL2Engine.Core.Physics.Interfaces;
 using SDL2Engine.Core.Rendering.Interfaces;
 using SDL2Engine.Core.Utils;
 using SDL2Engine.Core.Windowing.Interfaces;
+using SDL2Game.Core.AudioSynth;
+using SDL2Game.Core.Gui;
+using SDL2Game.Core.Pokemans;
 
-namespace SDL2Game;
+namespace SDL2Game.Core;
 
 public class MyGame : IGame
 {
@@ -25,15 +27,17 @@ public class MyGame : IGame
 
     private IServiceWindowService m_windowService;
     private IServiceRenderService m_renderService;
+    private IServiceGuiRenderService m_guiRenderService;
     private IServiceAssetManager m_assetManager;
     private IServiceAudioLoader m_audioLoader;
     private IServiceWindowConfig m_windowConfig;
     private IServiceCameraService m_cameraService;
     private IServicePhysicsService m_physicsService;
 
-    private nint m_renderer;
     private PokemonHandler m_pokemonHandler;
     private AudioSynthesizer m_audioSynthesizer;
+    private GuiTest m_guiTest;
+    
     private float minHue = 0.7f, maxHue = 0.85f;
     private float maxHueSeperation = 0.25f;
     
@@ -44,6 +48,8 @@ public class MyGame : IGame
     private int m_prevWindowX, m_prevWindowY;
     private bool isDragging = false;
     private int dragStartX, dragStartY, prevMouseX, prevMouseY;
+
+    private ImGuiDockData m_dockData;
     
     public void Initialize(IServiceProvider serviceProvider)
     {
@@ -51,6 +57,8 @@ public class MyGame : IGame
                           ?? throw new InvalidOperationException("IServiceWindowService is required but not registered.");
         m_renderService = serviceProvider.GetService<IServiceRenderService>() 
                           ?? throw new InvalidOperationException("IServiceRenderService is required but not registered.");
+        m_guiRenderService = serviceProvider.GetService<IServiceGuiRenderService>() 
+                             ?? throw new InvalidOperationException("IServiceGuiRenderService is required but not registered.");
         m_assetManager = serviceProvider.GetService<IServiceAssetManager>() 
                          ?? throw new InvalidOperationException("IServiceAssetManager is required but not registered.");
         m_audioLoader = serviceProvider.GetService<IServiceAudioLoader>() 
@@ -68,10 +76,15 @@ public class MyGame : IGame
 
     private void Initialize()
     {
-        m_renderer = m_renderService.GetRenderer();
+        m_dockData = new ImGuiDockData(
+            new DockPanelData("Main Dock", true),
+            new DockPanelData("Left Dock", false),
+            new DockPanelData("Top Dock", false),
+            new DockPanelData("Right Dock", true),
+            new DockPanelData("Bottom Dock", false));
         
         m_pokemonHandler = new PokemonHandler(m_audioLoader, m_assetManager, m_cameraService);
-        m_pokemonHandler.Initialize(m_renderer);
+        m_pokemonHandler.Initialize(m_renderService.RenderPtr);
 
         m_audioSynthesizer = new AudioSynthesizer(
             m_windowConfig.Settings.Width,
@@ -79,7 +92,6 @@ public class MyGame : IGame
             m_audioLoader);
         
         m_audioSynthesizer.Initialize(rectWidth: 4, rectMaxHeight: 75, rectSpacing: 4, bandIntensity: 3f);
-
         
         var songPath = SOUND_FOLDER + "/pokemon.wav"; //"/skidrow-portal.wav"; 
 
@@ -101,7 +113,7 @@ public class MyGame : IGame
         {
             Debug.Log("<color=yellow>SPACE pressed! Spawning 10 'jigglypuff' boxes...</color>");
 
-            var boxTexture = m_assetManager.LoadTexture(m_renderer, RESOURCES_FOLDER + "/jigglypuff.png");
+            var boxTexture = m_assetManager.LoadTexture(m_renderService.RenderPtr, RESOURCES_FOLDER + "/jigglypuff.png");
             Debug.Log($"Loaded Texture Id: {boxTexture.Id}, Size: {boxTexture.Width}x{boxTexture.Height}");
 
             var rnd = new Random();
@@ -144,10 +156,41 @@ public class MyGame : IGame
             box.Update(deltaTime);
         }
 
-        m_pokemonHandler.Update();
+        m_pokemonHandler.Update(deltaTime);
+    }
+    
+    public void Render()
+    {
+        minHue += Time.DeltaTime * 0.01f;
+        maxHue += Time.DeltaTime * 0.01f;
+        if (minHue >= 1.0f) minHue -= 1.0f;
+        if (maxHue >= 1.0f) maxHue -= 1.0f;
+        if (maxHue > minHue + maxHueSeperation) maxHue = minHue + maxHueSeperation;
+        if (minHue > maxHue - maxHueSeperation) minHue = maxHue - maxHueSeperation;
+
+        m_pokemonHandler.Render(m_renderService.RenderPtr);
+        
+        foreach (var box in m_boxes)
+        {
+            box.Render(m_renderService.RenderPtr, m_assetManager);
+        }
+        
+        m_audioSynthesizer.Render(m_renderService.RenderPtr, minHue, maxHue);
     }
 
-    public void HandleMouseDragAndApplyForce()
+    public void RenderGui()
+    {
+        if(m_dockData.IsDockInitialized == false)
+            m_dockData = m_guiRenderService.InitializeDockSpace(m_dockData);
+        m_guiRenderService.RenderFullScreenDockSpace(m_dockData);
+    }
+
+    public void Shutdown()
+    {
+        m_pokemonHandler.CleanUp();
+    }
+    
+    private void HandleMouseDragAndApplyForce()
     {
         int mouseX, mouseY;
         SDL.SDL_GetMouseState(out mouseX, out mouseY);
@@ -166,8 +209,10 @@ public class MyGame : IGame
             int deltaX = mouseX - prevMouseX;
             int deltaY = mouseY - prevMouseY;
 
-            foreach (var box in m_boxes)
+            for (var index = 0; index < m_boxes.Count; index++)
             {
+                if (index > 20) break;
+                var box = m_boxes[index];
                 Vector2 force = new Vector2(deltaX, deltaY);
                 box.PhysicsBody.ApplyForce(force, box.PhysicsBody.GetWorldCenter(), true);
             }
@@ -182,26 +227,4 @@ public class MyGame : IGame
         }
     }
 
-    public void Render()
-    {
-        minHue += Time.DeltaTime * 0.01f;
-        maxHue += Time.DeltaTime * 0.01f;
-        if (minHue >= 1.0f) minHue -= 1.0f;
-        if (maxHue >= 1.0f) maxHue -= 1.0f;
-        if (maxHue > minHue + maxHueSeperation) maxHue = minHue + maxHueSeperation;
-        if (minHue > maxHue - maxHueSeperation) minHue = maxHue - maxHueSeperation;
-
-        m_pokemonHandler.Render(m_renderer);
-        m_audioSynthesizer.Render(m_renderer, minHue, maxHue);
-        
-        foreach (var box in m_boxes)
-        {
-            box.Render(m_renderer, m_assetManager);
-        }
-    }
-
-    public void Shutdown()
-    {
-        m_pokemonHandler.CleanUp();
-    }
 }

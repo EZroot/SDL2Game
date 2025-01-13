@@ -4,14 +4,14 @@ using SDL2Engine.Core.Addressables;
 using SDL2Engine.Core.Addressables.Interfaces;
 using SDL2Engine.Core.Input;
 using SDL2Engine.Core.Rendering.Interfaces;
-using SDL2Game.GameObjects;
+using SDL2Game.Core.Pokemans.GameObjects;
 
-namespace SDL2Game
+namespace SDL2Game.Core.Pokemans
 {
     public class PokemonHandler
     {
         private const string RESOURCES_FOLDER = "/home/anon/Repos/SDL_Engine/SDL2Engine/resources";
-        private const int POKEMON_MULTIPLIER = 1;
+        private const int POKEMON_MULTIPLIER = 20;
         
         private readonly IServiceAudioLoader m_audioLoader;
         private readonly IServiceAssetManager m_assetManager;
@@ -82,10 +82,8 @@ namespace SDL2Game
             }
         }
 
-        public void Update()
+        public void Update(float deltaTime)
         {
-            float deltaTime = Time.DeltaTime;
-
             if (InputManager.IsKeyPressed(SDL.SDL_Keycode.SDLK_w))
                 m_ash.Position = new Vector2(m_ash.Position.X, m_ash.Position.Y - 10f * deltaTime);
             if (InputManager.IsKeyPressed(SDL.SDL_Keycode.SDLK_a))
@@ -112,14 +110,6 @@ namespace SDL2Game
             {
                 amplitude += m_audioLoader.GetAmplitudeByName(i.ToString());
             }
-
-            float scaleFactor = baseScale + amplitude;
-            m_currentScaleAsh = MathHelper.Lerp(m_currentScaleAsh, scaleFactor, 0.1f);
-            m_currentScaleAsh = Math.Min(m_currentScaleAsh, 3f);
-
-            float normalizedAshScale = m_currentScaleAsh; 
-            m_ash.Scale = new Vector2(normalizedAshScale, normalizedAshScale);
-            m_ash.Render(renderer, m_assetManager, m_cameraService);
 
             float pokemansBaseScale = 0.5f;
             float pokemansMaxScale = 5f;
@@ -149,6 +139,14 @@ namespace SDL2Game
 
                 // pokemon.Position = originalPos;
             }
+            
+            float scaleFactor = baseScale + amplitude;
+            m_currentScaleAsh = MathHelper.Lerp(m_currentScaleAsh, scaleFactor, 0.1f);
+            m_currentScaleAsh = Math.Min(m_currentScaleAsh, 3f);
+
+            float normalizedAshScale = m_currentScaleAsh; 
+            m_ash.Scale = new Vector2(normalizedAshScale, normalizedAshScale);
+            m_ash.Render(renderer, m_assetManager, m_cameraService);
         }
 
         /// <summary>

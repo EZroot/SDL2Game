@@ -1,5 +1,7 @@
 ﻿using SDL2Engine.Core;
-using SDL2Game;
+using SDL2Game.Core;
+
+namespace SDL2Game;
 
 public static class Program
 {
