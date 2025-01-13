@@ -1,10 +1,12 @@
 using ImGuiNET;
+using SDL2;
 using SDL2Engine.Core.CoreSystem.Configuration;
 using SDL2Engine.Core.GuiRenderer;
 using SDL2Engine.Core.GuiRenderer.Helpers;
 using SDL2Engine.Core.GuiRenderer.Interfaces;
 using SDL2Engine.Core.Input;
 using SDL2Engine.Core.Utils;
+using SDL2Game.Core.Gui.Gui;
 
 namespace SDL2Game.Core.Gui;
 
@@ -17,12 +19,12 @@ public class GuiExample
     private IVariableBinder m_variableBinder;
 
     private ImGuiDockData m_guiDockerData;
-    
-    private  Dictionary<string, List<(string Property, string Value)>> m_debugQueryData;
     private int m_pokemonCount;
     
-    private ImGuiTableData m_tableData;
-    private ImGuiCellTableData m_cellTableData;
+    private GuiCellTableQuery m_guiPhysicsDebugCellTable;
+    private GuiCellTableQuery m_guiAudioSynthCellTable;
+    private GuiStringQuery<int> m_guiStringQuery_PokemonCount;
+    private GuiStringQuery<string> m_guiStringQuery_MouseOverLabel;
     
     public GuiExample(IServiceGuiRenderService guiRenderService, IServiceGuiWindowBuilder guiWindowBuilder, IVariableBinder guiVarBinder, IServiceSysInfo sysInfo)
     {
@@ -38,6 +40,11 @@ public class GuiExample
             new DockPanelData("Right Dock", true),
             new DockPanelData("Bottom Dock", false),
             hasFileMenu: true);
+
+        m_guiPhysicsDebugCellTable = new GuiCellTableQuery("CellTableOne",m_variableBinder);
+        m_guiAudioSynthCellTable = new GuiCellTableQuery("CellTableAudioSynth",m_variableBinder);
+        m_guiStringQuery_PokemonCount = new GuiStringQuery<int>("Pokemon Count", m_variableBinder);
+        m_guiStringQuery_MouseOverLabel = new GuiStringQuery<string>("##MouseLabel", m_variableBinder);
     }
 
     public void RenderGui()
@@ -45,7 +52,6 @@ public class GuiExample
         if (m_guiDockerData.IsDockInitialized == false)
         {
             m_guiDockerData = m_guiRenderService.InitializeDockSpace(m_guiDockerData);
-            Initialize();
         }
 
         m_guiRenderService.RenderFullScreenDockSpace(m_guiDockerData);
@@ -54,60 +60,33 @@ public class GuiExample
         if (m_showDebugConsole)
             Debug.RenderDebugConsole(ref m_showDebugConsole);
 
-        m_guiWindowBuilder.BeginWindow(m_guiDockerData.BottomDock.Name);
-        m_guiWindowBuilder.Draw("PokemonCount");
-        m_guiWindowBuilder.Draw("Table");
-        m_guiWindowBuilder.Draw("CellTableData");
+        m_guiWindowBuilder.BeginWindow("Physics Debugger");//m_guiDockerData.BottomDock.Name);
+        m_guiStringQuery_PokemonCount.DrawQuery(m_guiWindowBuilder);
+        m_guiStringQuery_MouseOverLabel.DrawQuery(m_guiWindowBuilder);
+        m_guiPhysicsDebugCellTable.DrawDebugQuery(m_guiWindowBuilder);
         m_guiWindowBuilder.EndWindow();
     }
 
-    private void Initialize()
+    public void UpdateDebugQuery(bool isHovering, Dictionary<string, List<(string Property, string Value)>> debugQuery)
     {
-        m_variableBinder.BindVariable<ImGuiTableData>("Table", m_tableData);
-        m_variableBinder.BindVariable("CellTableData", m_cellTableData);
-        m_variableBinder.BindVariable("PokemonCount", m_pokemonCount);
-        BindDebugQuery();
+        var label = isHovering ? "MouseQuery: Hovering over physicsObject" : "MouseQuery: N/A";
+        m_guiStringQuery_MouseOverLabel.UpdateQuery(label);
+        if (InputManager.IsMouseButtonPressed(SDL.SDL_BUTTON_RIGHT))
+        {
+            m_guiPhysicsDebugCellTable.UpdateDebugQuery(debugQuery);
+        }
     }
 
-    public void UpdateDebugQuery( Dictionary<string, List<(string Property, string Value)>> debugQuery)
+    public void UpdateAudioSynthQuery(Dictionary<string, List<(string Property, string Value)>> debugQuery)
     {
-        m_debugQueryData = debugQuery;
-        BindDebugQuery();
+        m_guiAudioSynthCellTable.UpdateDebugQuery(debugQuery);
     }
     
     public void UpdatePokemonCount(int addPokemonCount)
     {
-        m_pokemonCount += addPokemonCount;
-        m_variableBinder.BindVariable("PokemonCount", m_pokemonCount);
+        m_guiStringQuery_PokemonCount.UpdateQuery(addPokemonCount);
     }
-    private void BindDebugQuery()
-    {
-        var tableFlags = ImGuiTableFlags.None;
-        var labelOnRight = true;
-        var cells = new List<ImGuiCellData>();
-
-        foreach (var item in m_debugQueryData)
-        {
-            string header = item.Key; // The header from the dictionary key
-            List<(string Property, string Value)> properties = item.Value;
-        
-            // Build a flat list of strings from the list of tuples
-            List<string> values = new List<string>();
-            foreach (var prop in properties)
-            {
-                values.Add($"{prop.Property}: {prop.Value}");
-            }
-
-            cells.Add(new ImGuiCellData(header, values.ToArray()));
-        }
-
-        // Assuming ImGuiCellData and ImGuiCellTableData can accept an array of cells directly
-        var cellTableData = new ImGuiCellTableData(cells.ToArray());
-
-        // Update the binding with the new table structure
-        m_variableBinder.BindVariable("CellTableData", cellTableData);
-    }
-
+    
     private void RenderFileMenu()
     {
         if (ImGui.BeginMainMenuBar())

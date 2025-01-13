@@ -75,7 +75,8 @@ public class PhysicsExample
         {
             bodyInfo = new Dictionary<string, List<(string Property, string Value)>>()
             {
-                { "General State", new List<(string, string)>
+                {
+                    "General State", new List<(string, string)>
                     {
                         ("IsEnabled", body.IsEnabled.ToString()),
                         ("IsAwake", body.IsAwake.ToString()),
@@ -83,25 +84,33 @@ public class PhysicsExample
                         ("BodyType", body.BodyType.ToString())
                     }
                 },
-                { "Physical Properties", new List<(string, string)>
+                {
+                    "Physical Properties", new List<(string, string)>
                     {
                         ("Mass", body.Mass.ToString()),
                         ("Inertia", body.Inertia.ToString()),
                     }
                 },
-                { "Dynamic Properties", new List<(string, string)>
+                {
+                    "Dynamic Properties", new List<(string, string)>
                     {
                         ("AngularDamping", body.AngularDamping.ToString()),
                         ("AngularVelocity", body.AngularVelocity.ToString()),
                         ("LinearDamping", body.LinearDamping.ToString()),
                         ("LinearVelocity", body.LinearVelocity.ToString())
                     }
-                }
+                },
+                // {
+                //     "World", new List<(string, string)>
+                //     {
+                //         ("BodyCount", body.World.BodyCount.ToString()),
+                //         ("Gravity", body.World.Gravity.ToString()),
+                //         ("ContactCount", body.World.ContactCount.ToString()),
+                //     }
+                // }
             };
-
         }
-
-        example.UpdateDebugQuery(bodyInfo);
+        example.UpdateDebugQuery(body != null, bodyInfo);
     }
 
     private void SpawnBoxes(GuiExample guiExample)
