@@ -82,7 +82,7 @@ public class MyGame : IGame
             m_windowConfig.Settings.Width,
             m_windowConfig.Settings.Height,
             m_audioLoaderService);
-        m_networkExample = new NetworkExample(m_networkService);
+        m_networkExample = new NetworkExample(m_networkService, m_guiRenderService, m_guiWindowBuilder, m_guiVarBinder);
         
         m_pokemonHandler.Initialize(m_renderService.RenderPtr);
         m_audioSynthesizer.Initialize(rectWidth: 4, rectMaxHeight: 75, rectSpacing: 4, bandIntensity: 3f);
@@ -116,6 +116,7 @@ public class MyGame : IGame
 
     public void RenderGui()
     {
+        m_networkExample.RenderGui();
         m_guiExample.RenderGui();
     }
 

@@ -1,24 +1,45 @@
+using SDL2Engine.Core.GuiRenderer;
+using SDL2Engine.Core.GuiRenderer.Interfaces;
 using SDL2Engine.Core.Networking.Interfaces;
 using SDL2Engine.Core.Utils;
 using SDL2Engine.Events;
 using SDL2Engine.Events.EventData;
+using SDL2Game.Core.Networking.Gui;
 
 namespace SDL2Game.Core.Networking;
 
 public class NetworkExample
 {
     private const int PORT = 6969;
-    private INetworkService m_networkService;
+    private const string ADDRESS = "127.0.0.1";
     
-    public NetworkExample(INetworkService networkService)
+    private INetworkService m_networkService;
+    private IGuiRenderService m_guiRenderService;
+    private IGuiWindowBuilder m_guiWindowBuilder;
+    private IVariableBinder m_variableBinder;
+    
+    private NetChatWindow m_netChatWindow;
+    private ConnectionManager m_connectionManager;
+    
+    public NetworkExample(INetworkService networkService, IGuiRenderService guiRenderService, IGuiWindowBuilder guiWindowBuilder, IVariableBinder guiVarBinder)
     {
         m_networkService = networkService;
+        m_guiRenderService = guiRenderService;
+        m_guiWindowBuilder = guiWindowBuilder;
+        m_variableBinder = guiVarBinder;
+
+        m_connectionManager = new ConnectionManager(ADDRESS, PORT, m_networkService);
+        m_netChatWindow = new NetChatWindow(m_connectionManager, m_networkService, m_guiRenderService, m_guiWindowBuilder, m_variableBinder);
     }
 
     public void Initialize()
     {
         SubscribeToEvents();
-        Task.Run(StartServer);
+    }
+
+    public void RenderGui()
+    {
+        m_netChatWindow.RenderGui();   
     }
 
     public void Shutdown()
@@ -35,40 +56,19 @@ public class NetworkExample
         EventHub.Subscribe<OnClientMessageRecieved>(OnClientMessageRecieved);
         EventHub.Subscribe<OnServerMessageRecieved>(OnServerMessageRecieved);
     }
-
+    
     private void OnServerMessageRecieved(object? sender, OnServerMessageRecieved e)
     {
-        var message = NetHelper.ParseReceivedData(e.Data.RawBytes);
+        var message = NetHelper.BytesToString(e.Data.RawBytes);
         Debug.Log($"<color=magenta>SERVER:</color> <color=yellow>Recieved</color> {message.Message}");
     }
 
     private void OnClientMessageRecieved(object? sender, OnClientMessageRecieved e)
     {
-        var message = NetHelper.ParseReceivedData(e.Data.RawBytes);
+        var message = NetHelper.BytesToString(e.Data.RawBytes);
         Debug.Log($"<color=blue>CLIENT:</color> <color=yellow>Recieved</color> {message.Message}");
     }
-
-    private async Task StartServer()
-    {
-        await m_networkService.Server.Start(PORT);
-    }
     
-    private async Task StartClient()
-    {
-        try
-        {
-            await m_networkService.Client.Connect("127.0.0.1", PORT);
-        }
-        catch (Exception ex)
-        {
-            Debug.LogError($"Failed to connect <color=magenta>CLIENT:</color> {ex.Message}");
-        }
-
-        string message = "Hello, Server!";
-        byte[] dataToSend = System.Text.Encoding.UTF8.GetBytes(message);
-        await m_networkService.Client.SendDataAsync(dataToSend);
-    }
-
     private void OnServerClientConnectionStatus(object? sender, OnServerClientConnectionStatus e)
     {
         switch (e.ClientStatus)
@@ -103,7 +103,6 @@ public class NetworkExample
                 break;
             case ServerStatus.Started:
                 Debug.Log($"<color=blue>SERVER:</color> Server is started!");
-                Task.Run(StartClient);
                 break;
             case ServerStatus.Ending:
                 Debug.Log($"<color=blue>SERVER:</color> Server is ending!");
