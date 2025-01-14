@@ -52,8 +52,8 @@ public class NetworkExample
     {
         await m_networkService.Server.Start(PORT);
     }
-
-    private async Task ClientConnection()
+    
+    private async Task StartClient()
     {
         try
         {
@@ -103,7 +103,7 @@ public class NetworkExample
                 break;
             case ServerStatus.Started:
                 Debug.Log($"<color=blue>SERVER:</color> Server is started!");
-                Task.Run(ClientConnection);
+                Task.Run(StartClient);
                 break;
             case ServerStatus.Ending:
                 Debug.Log($"<color=blue>SERVER:</color> Server is ending!");
