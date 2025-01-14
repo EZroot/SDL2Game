@@ -18,9 +18,6 @@ public class NetChatWindow
     private IGuiWindowBuilder m_guiWindowBuilder;
     private IVariableBinder m_variableBinder;
 
-    private bool m_isChatWindowOpen = true;
-    private bool m_isUsernameWindowOpen = false;
-    
     private List<string> m_recievedClientMessages = new();
     private List<string> m_recievedServerMessages = new();
 
@@ -61,57 +58,48 @@ public class NetChatWindow
     
 public void RenderGui()
 {
-    if (m_isChatWindowOpen)
+    if (NetGuiWindowBindings.IsShowingNetWindow)
     {
-        if (ImGui.Begin("Network Chat", ref m_isChatWindowOpen, ImGuiWindowFlags.MenuBar ))
+        if (ImGui.Begin("Network Chat", ref NetGuiWindowBindings.IsShowingNetWindow, ImGuiWindowFlags.MenuBar ))
         {
             if (ImGui.BeginMenuBar())
             {
                 if (ImGui.Button("Options"))
                 {
-                    ImGui.OpenPopup("MoreOptionsPopup");
+                    
                 }
-
                 ImGui.Separator();
-                ImGui.Text(" Net Chat");
-
-                if (ImGui.BeginPopup("MoreOptionsPopup"))
+                if (ImGui.Button("Start Server"))
                 {
-                    if (ImGui.Checkbox("Start Server", ref m_startServer))
+                    m_startServer = !m_startServer;
+
+                    if (m_startServer)
                     {
-                        if (m_startServer)
-                        {
-                            m_connectionManager.StartServer();
-                        }
-                        else
-                        {
-                            m_connectionManager.StopServer();
-                        }
+                        m_connectionManager.StartServer();
                     }
-                    
-                    if (ImGui.Checkbox("Start Client", ref m_startClient))
+                    else
                     {
-                        if (m_startClient)
-                        {
-                            m_connectionManager.StartClient();
-                        }
-                        else
-                        {
-                            m_connectionManager.StopClient();
-                        }
-                    }                 
-                    
-                    ImGui.EndPopup();
+                        m_connectionManager.StopServer();
+                    }
                 }
 
+                if (ImGui.Button("Start Client"))
+                {
+                    m_startClient = !m_startClient;
+                    if (m_startClient)
+                    {
+                        m_connectionManager.StartClient();
+                    }
+                    else
+                    {
+                        m_connectionManager.StopClient();
+                    }
+                }
+                ImGui.SeparatorText($"SERVER: {m_serverNetStatus.ToString().ToUpper()} CLIENT: {m_clientNetStatus.ToString().ToUpper()}");
                 ImGui.EndMenuBar();
             }
 
-            ImGui.SeparatorText("A simple networking chat example");
-            
-            ImGui.Text($"Username: {m_username}");
-            
-            ImGui.SameLine();
+            ImGui.SeparatorText("Username Setup");
             
             if (ImGui.InputText("##SetUsernameInput", ref m_usernameBuffer, 24))
             {
@@ -125,6 +113,8 @@ public void RenderGui()
                 m_username = m_usernameBuffer;
             }
             
+            ImGui.SeparatorText("");
+
             Vector2 availableSize = ImGui.GetContentRegionAvail();
             float childWidth = (availableSize.X / 3) - ImGui.GetStyle().ItemSpacing.X;
             float childHeight = availableSize.Y - 24;

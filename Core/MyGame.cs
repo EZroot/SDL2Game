@@ -87,7 +87,7 @@ public class MyGame : IGame
         m_pokemonHandler.Initialize(m_renderService.RenderPtr);
         m_audioSynthesizer.Initialize(rectWidth: 4, rectMaxHeight: 75, rectSpacing: 4, bandIntensity: 3f);
 
-        var songPath = GameHelper.SOUND_FOLDER + "/pokemon.wav"; //"/skidrow.wav";//
+        var songPath = GameHelper.SOUND_FOLDER + "/skidrow.wav";//"/pokemon.wav";"
         var song = m_assetService.LoadSound(songPath);
         m_assetService.PlaySound(song, GameHelper.GLOBAL_VOLUME);
         

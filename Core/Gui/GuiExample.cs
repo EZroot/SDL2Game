@@ -7,6 +7,7 @@ using SDL2Engine.Core.GuiRenderer.Interfaces;
 using SDL2Engine.Core.Input;
 using SDL2Engine.Core.Utils;
 using SDL2Game.Core.Gui.Gui;
+using SDL2Game.Core.Networking.Gui;
 
 namespace SDL2Game.Core.Gui;
 
@@ -103,19 +104,14 @@ public class GuiExample
             {
             }
 
-            if (ImGui.Button("Debug"))
+            if (ImGui.Button("Debug Console"))
             {
-                ImGui.OpenPopup("DebugWindowPopup");
+                m_showDebugConsole = !m_showDebugConsole;
             }
 
-            if (ImGui.BeginPopup("DebugWindowPopup"))
+            if (ImGui.Button("Network Chat"))
             {
-                if (ImGui.Button("Show Console Output"))
-                {
-                    m_showDebugConsole = !m_showDebugConsole;
-                }
-
-                ImGui.EndPopup();
+                NetGuiWindowBindings.IsShowingNetWindow = !NetGuiWindowBindings.IsShowingNetWindow;
             }
 
             var fps = $"Fps: {Time.Fps:F2} (delta: {Time.DeltaTime:F2})";

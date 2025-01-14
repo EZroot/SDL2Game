@@ -18,22 +18,26 @@ public class ConnectionManager
 
     public void StartServer()
     {
-        Task.Run(StartServerAsync);
+        _ = StartServerAsync();
+        // Task.Run(StartServerAsync);
     }
 
     public void StartClient()
     {
-        Task.Run(StartClientAsync);
+        _ = StartClientAsync();
+        //Task.Run(StartClientAsync);
     }
     
     public void StopServer()
     {
-        Task.Run(StopServerAsync);
+        _ = StopServerAsync();
+        // Task.Run(StopServerAsync);
     }
 
     public void StopClient()
     {
-        Task.Run(StopClientAsync);
+        _ = StopClientAsync();
+        //Task.Run(StopClientAsync);
     }
     
     private async Task StartServerAsync()

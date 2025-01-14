@@ -124,10 +124,10 @@ public class PhysicsExample
             Debug.Log($"Loaded Texture Id: {boxTexture.Id}, Size: {boxTexture.Width}x{boxTexture.Height}");
 
             var rnd = new Random();
-            int numberOfBoxes = 10;
+            int numberOfBoxes = 1;
             for (int i = 0; i < numberOfBoxes; i++)
             {
-                float xPos = rnd.Next(50, m_windowConfig.Settings.Width - 50);
+                float xPos = rnd.Next(150, m_windowConfig.Settings.Width - 150);
                 float yPos = 100; // start them near the top
 
                 var boxObject = new GameObject
