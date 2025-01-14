@@ -9,12 +9,14 @@ using SDL2Engine.Core.GuiRenderer;
 using SDL2Engine.Core.GuiRenderer.Helpers;
 using SDL2Engine.Core.GuiRenderer.Interfaces;
 using SDL2Engine.Core.Input;
+using SDL2Engine.Core.Networking.Interfaces;
 using SDL2Engine.Core.Physics.Interfaces;
 using SDL2Engine.Core.Rendering.Interfaces;
 using SDL2Engine.Core.Utils;
 using SDL2Engine.Core.Windowing.Interfaces;
 using SDL2Game.Core.AudioSynth;
 using SDL2Game.Core.Gui;
+using SDL2Game.Core.Networking;
 using SDL2Game.Core.Physics;
 using SDL2Game.Core.Pokemans;
 using SDL2Game.Core.Utils;
@@ -37,14 +39,16 @@ public class MyGame : IGame
     private ICameraService m_cameraService;
     private IPhysicsService m_physicsService;
     private ISysInfo m_sysInfo;
-
+    private INetworkService m_networkService;
+    
     #endregion
 
     private PokemonHandler m_pokemonHandler;
     private AudioSynthesizer m_audioSynthesizer;
     private GuiExample m_guiExample;
     private PhysicsExample m_physicsExample;
-
+    private NetworkExample m_networkExample;
+    
     private float minHue = 0.7f, maxHue = 0.85f;
     private float maxHueSeperation = 0.25f;
 
@@ -62,6 +66,7 @@ public class MyGame : IGame
         m_sysInfo = serviceProvider.GetService<ISysInfo>() ?? throw new InvalidOperationException("IServiceSysInfo is required but not registered.");
         m_guiWindowBuilder = serviceProvider.GetService<IGuiWindowBuilder>() ?? throw new InvalidOperationException("IServiceGuiWindowBuilder is required but not registered.");
         m_guiVarBinder = serviceProvider.GetService<IVariableBinder>() ?? throw new InvalidOperationException("IVariableBinder is required but not registered.");
+        m_networkService = serviceProvider.GetService<INetworkService>() ?? throw new InvalidOperationException("INetworkService is required but not registered.");
         #endregion
 
         InitializeInternal();
@@ -77,13 +82,16 @@ public class MyGame : IGame
             m_windowConfig.Settings.Width,
             m_windowConfig.Settings.Height,
             m_audioLoaderService);
-
+        m_networkExample = new NetworkExample(m_networkService);
+        
         m_pokemonHandler.Initialize(m_renderService.RenderPtr);
         m_audioSynthesizer.Initialize(rectWidth: 4, rectMaxHeight: 75, rectSpacing: 4, bandIntensity: 3f);
 
         var songPath = GameHelper.SOUND_FOLDER + "/pokemon.wav"; //"/skidrow.wav";//
         var song = m_assetService.LoadSound(songPath);
         m_assetService.PlaySound(song, GameHelper.GLOBAL_VOLUME);
+        
+        m_networkExample.Initialize();
     }
 
     public void Update(float deltaTime)
@@ -113,6 +121,7 @@ public class MyGame : IGame
 
     public void Shutdown()
     {
+        m_networkExample.Shutdown();
         m_pokemonHandler.CleanUp();
     }
 }
