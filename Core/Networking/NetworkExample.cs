@@ -60,13 +60,13 @@ public class NetworkExample
     private void OnServerMessageRecieved(object? sender, OnServerMessageRecieved e)
     {
         var message = NetHelper.BytesToString(e.Data.RawBytes);
-        Debug.Log($"<color=magenta>SERVER:</color> <color=yellow>Recieved</color> {message.Message}");
+        Debug.Log($"<color=magenta>SERVER EVENT:</color> <color=yellow>Recieved</color> {message.Message}");
     }
 
     private void OnClientMessageRecieved(object? sender, OnClientMessageRecieved e)
     {
         var message = NetHelper.BytesToString(e.Data.RawBytes);
-        Debug.Log($"<color=blue>CLIENT:</color> <color=yellow>Recieved</color> {message.Message}");
+        Debug.Log($"<color=blue>CLIENT EVENT:</color> <color=yellow>Recieved</color> {message.Message}");
     }
     
     private void OnServerClientConnectionStatus(object? sender, OnServerClientConnectionStatus e)
@@ -74,22 +74,22 @@ public class NetworkExample
         switch (e.ClientStatus)
         {
             case ClientStatus.Connecting:
-                Debug.Log($"<color=blue>SERVER:</color> [<color=magenta>{e.ClientData.Name}</color>] Client connecting...");
+                Debug.Log($"<color=blue>SERVER EVENT:</color> [<color=magenta>{e.ClientData.Name}</color>] Client connecting...");
                 break;
             case ClientStatus.Connected:
-                Debug.Log($"<color=blue>SERVER:</color> [<color=magenta>{e.ClientData.Name}</color>] Client connected!");
+                Debug.Log($"<color=blue>SERVER EVENT:</color> [<color=magenta>{e.ClientData.Name}</color>] Client connected!");
                 break;
             case ClientStatus.Disconnecting:
-                Debug.Log($"<color=blue>SERVER:</color> [<color=magenta>{e.ClientData.Name}</color>] Client disconnecting...");
+                Debug.Log($"<color=blue>SERVER EVENT:</color> [<color=magenta>{e.ClientData.Name}</color>] Client disconnecting...");
                 break;
             case ClientStatus.Disconnected:
-                Debug.Log($"<color=blue>SERVER:</color> [<color=magenta>{e.ClientData.Name}</color>] Client disconnected!");
+                Debug.Log($"<color=blue>SERVER EVENT:</color> [<color=magenta>{e.ClientData.Name}</color>] Client disconnected!");
                 break;
             case ClientStatus.ServerClosedConnection:
-                Debug.Log($"<color=blue>SERVER:</color> [<color=magenta>{e.ClientData.Name}</color>] Client server closed connection!");
+                Debug.Log($"<color=blue>SERVER EVENT:</color> [<color=magenta>{e.ClientData.Name}</color>] Client server closed connection!");
                 break;
             case ClientStatus.TimedOut:
-                Debug.Log($"<color=blue>SERVER:</color> [<color=magenta>{e.ClientData.Name}</color>] Client timed out!");
+                Debug.Log($"<color=blue>SERVER EVENT:</color> [<color=magenta>{e.ClientData.Name}</color>] Client timed out!");
                 break;
         }
     }
@@ -99,16 +99,16 @@ public class NetworkExample
         switch (e.ServerStatus)
         {
             case ServerStatus.Starting:
-                Debug.Log($"<color=blue>SERVER:</color> Server is starting...");
+                Debug.Log($"<color=blue>SERVER EVENT:</color> Server is starting...");
                 break;
             case ServerStatus.Started:
-                Debug.Log($"<color=blue>SERVER:</color> Server is started!");
+                Debug.Log($"<color=blue>SERVER EVENT:</color> Server is started!");
                 break;
             case ServerStatus.Ending:
-                Debug.Log($"<color=blue>SERVER:</color> Server is ending!");
+                Debug.Log($"<color=blue>SERVER EVENT:</color> Server is ending!");
                 break;
             case ServerStatus.Ended:
-                Debug.Log($"<color=blue>SERVER:</color> Server is ended!");
+                Debug.Log($"<color=blue>SERVER EVENT:</color> Server is ended!");
                 break;
         }
     }
@@ -118,22 +118,22 @@ public class NetworkExample
         switch (e.ClientStatus)
         {
             case ClientStatus.Connecting:
-                Debug.Log($"<color=magenta>CLIENT:</color> Client connecting...");
+                Debug.Log($"<color=magenta>CLIENT EVENT:</color> Client connecting...");
                 break;
             case ClientStatus.Connected:
-                Debug.Log($"<color=magenta>CLIENT:</color> Client connected!");
+                Debug.Log($"<color=magenta>CLIENT EVENT:</color> Client connected!");
                 break;
             case ClientStatus.Disconnecting:
-                Debug.Log($"<color=magenta>CLIENT:</color> Client disconnecting...");
+                Debug.Log($"<color=magenta>CLIENT EVENT:</color> Client disconnecting...");
                 break;
             case ClientStatus.Disconnected:
-                Debug.Log($"<color=magenta>CLIENT:</color> Client disconnected!");
+                Debug.Log($"<color=magenta>CLIENT EVENT:</color> Client disconnected!");
                 break;
             case ClientStatus.ServerClosedConnection:
-                Debug.Log($"<color=magenta>CLIENT:</color> Client server closed connection!");
+                Debug.Log($"<color=magenta>CLIENT EVENT:</color> Client server closed connection!");
                 break;
             case ClientStatus.TimedOut:
-                Debug.Log($"<color=magenta>CLIENT:</color> Client timed out!");
+                Debug.Log($"<color=magenta>CLIENT EVENT:</color> Client timed out!");
                 break;
         }
     }

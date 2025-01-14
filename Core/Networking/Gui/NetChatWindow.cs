@@ -19,10 +19,16 @@ public class NetChatWindow
     private IVariableBinder m_variableBinder;
 
     private bool m_isChatWindowOpen = true;
+    private bool m_isUsernameWindowOpen = false;
+    
     private List<string> m_recievedClientMessages = new();
     private List<string> m_recievedServerMessages = new();
+
+    private string m_username = "Default";
     
+    private string m_usernameBuffer = "";
     private string m_chatBuffer = "";
+    
     private bool m_startServer;
     private bool m_startClient;
 
@@ -53,105 +59,154 @@ public class NetChatWindow
         EventHub.Subscribe<OnServerMessageRecieved>(OnServerMessageRecieved);
     }
     
-    public void RenderGui()
+public void RenderGui()
+{
+    if (m_isChatWindowOpen)
     {
-        if (m_isChatWindowOpen)
+        if (ImGui.Begin("Network Chat", ref m_isChatWindowOpen, ImGuiWindowFlags.MenuBar ))
         {
-            if (ImGui.Begin("Network Chat", ref m_isChatWindowOpen, ImGuiWindowFlags.MenuBar))
+            if (ImGui.BeginMenuBar())
             {
-                if (ImGui.BeginMenuBar())
+                if (ImGui.Button("Options"))
                 {
-                    if (ImGui.Button("Options"))
-                    {
-                        ImGui.OpenPopup("MoreOptionsPopup");
-                    }
-
-                    ImGui.Separator();
-                    ImGui.Text(" Net Chat");
-
-                    if (ImGui.BeginPopup("MoreOptionsPopup"))
-                    {
-                        if (ImGui.Checkbox("Start Server", ref m_startServer))
-                        {
-                            if (m_startServer)
-                            {
-                                m_connectionManager.StartServer();
-                            }
-                            else
-                            {
-                                m_connectionManager.StopServer();
-                            }
-                        }
-                        
-                        if (ImGui.Checkbox("Start Client", ref m_startClient))
-                        {
-                            if (m_startClient)
-                            {
-                                m_connectionManager.StartClient();
-                            }
-                            else
-                            {
-                                m_connectionManager.StopClient();
-                            }
-                        }                 
-                        
-                        ImGui.EndPopup();
-                    }
-
-                    ImGui.EndMenuBar();
+                    ImGui.OpenPopup("MoreOptionsPopup");
                 }
 
-                Vector2 availableSize = ImGui.GetContentRegionAvail();
-                float childWidth = (availableSize.X / 2) - ImGui.GetStyle().ItemSpacing.X;
-                float childHeight = availableSize.Y - 32;
-
-                if (ImGui.BeginChild("ClientMsgs", new Vector2(childWidth, childHeight), ImGuiChildFlags.Borders))
-                {
-                    ImGui.Text($"Client Chat (Status: {m_clientNetStatus})");
-                    ImGui.Separator();
-                    foreach (var chat in m_recievedClientMessages)
-                    {
-                        ImGui.TextUnformatted($"CLIENT:> {chat}");
-                    }
-                    ImGui.EndChild();
-                }
-
-                ImGui.SameLine();
-
-                if (ImGui.BeginChild("ServerMsgs", new Vector2(childWidth, childHeight), ImGuiChildFlags.Borders))
-                {
-                    ImGui.Text($"Server Chat (Status: {m_serverNetStatus})");
-                    ImGui.Separator();
-                    foreach (var chat in m_recievedServerMessages)
-                    {
-                        ImGui.TextUnformatted($"SERVER:> {chat}");
-                    }
-                    ImGui.EndChild();
-                }
                 ImGui.Separator();
-                ImGui.Text("Msg:>");
-                
-                ImGui.SameLine();
+                ImGui.Text(" Net Chat");
 
-                if (ImGui.InputText("##UserChat", ref m_chatBuffer, 1024))
+                if (ImGui.BeginPopup("MoreOptionsPopup"))
                 {
+                    if (ImGui.Checkbox("Start Server", ref m_startServer))
+                    {
+                        if (m_startServer)
+                        {
+                            m_connectionManager.StartServer();
+                        }
+                        else
+                        {
+                            m_connectionManager.StopServer();
+                        }
+                    }
                     
+                    if (ImGui.Checkbox("Start Client", ref m_startClient))
+                    {
+                        if (m_startClient)
+                        {
+                            m_connectionManager.StartClient();
+                        }
+                        else
+                        {
+                            m_connectionManager.StopClient();
+                        }
+                    }                 
+                    
+                    ImGui.EndPopup();
                 }
+
+                ImGui.EndMenuBar();
+            }
+
+            ImGui.SeparatorText("A simple networking chat example");
+            
+            ImGui.Text($"Username: {m_username}");
+            
+            ImGui.SameLine();
+            
+            if (ImGui.InputText("##SetUsernameInput", ref m_usernameBuffer, 24))
+            {
                 
-                ImGui.SameLine();
-                
-                if (ImGui.Button("Send"))
+            }
+            
+            ImGui.SameLine();
+
+            if (ImGui.Button("Set"))
+            {
+                m_username = m_usernameBuffer;
+            }
+            
+            Vector2 availableSize = ImGui.GetContentRegionAvail();
+            float childWidth = (availableSize.X / 3) - ImGui.GetStyle().ItemSpacing.X;
+            float childHeight = availableSize.Y - 24;
+
+            ImGui.BeginChild("ClientMsgs", new Vector2(childWidth+192, childHeight), ImGuiChildFlags.Borders);
+            {
+                ImGui.Text($"Client Chat (Status: {m_clientNetStatus})");
+                ImGui.Separator();
+                foreach (var chat in m_recievedClientMessages)
                 {
-                    m_recievedClientMessages.Add($"Sent: {m_chatBuffer}");
-                    var data = NetHelper.StringToBytes(m_chatBuffer);
+                    ImGui.TextUnformatted($"{chat}");
+                }
+            }
+            ImGui.EndChild();
+
+            ImGui.SameLine();
+
+            ImGui.BeginChild("ServerMsgs", new Vector2(childWidth-64, childHeight), ImGuiChildFlags.Borders);
+            {
+                ImGui.Text($"Server Chat (Status: {m_serverNetStatus})");
+                ImGui.Separator();
+                foreach (var chat in m_recievedServerMessages)
+                {
+                    ImGui.TextUnformatted($"RECIEVED: {chat}");
+                }
+            }
+            ImGui.EndChild();
+            
+            ImGui.SameLine();
+
+            ImGui.BeginChild("ConnectedClients", new Vector2(childWidth-124, childHeight), ImGuiChildFlags.Borders);
+            {
+                try
+                {
+                    if (m_networkService.Server.Connections != null)
+                    {
+                        ImGui.Text($"Connections ({m_networkService.Server.Connections.Count})");
+                        ImGui.Separator();
+                        foreach (var conn in m_networkService.Server.Connections)
+                        { 
+                            ImGui.Text($"Client - {conn.Id} - [{conn.TcpClient.Client.RemoteEndPoint}] Conn:{conn.TcpClient.Connected}");
+                        }
+                    }
+                }
+                catch (Exception e)
+                {
+                    Debug.LogError(e.Message);
+                }
+            }
+            ImGui.EndChild();
+
+            ImGui.Separator();
+            ImGui.Text($"{m_username}:>");
+            
+            ImGui.SameLine();
+
+            if (ImGui.InputText("##UserChat", ref m_chatBuffer, 1024))
+            {
+            }
+            
+            ImGui.SameLine();
+
+            if (ImGui.Button("Send"))
+            {
+                if (m_clientNetStatus != ClientStatus.Connected)
+                {
+                    m_recievedClientMessages.Add("ERROR: Not connected to server!");
+                }
+                else
+                {
+                    var msg = $"{m_username}:> {m_chatBuffer}";
+                    var data = NetHelper.StringToBytes(msg);
                     m_networkService.Client.SendDataAsync(data.Data);
                     m_chatBuffer = "";
                 }
-                ImGui.End();
             }
+
+            ImGui.End();
         }
     }
-    
+}
+
     private void OnServerStatusChanged(object? sender, OnServerStatusChanged e)
     {
         m_serverNetStatus = e.ServerStatus;
