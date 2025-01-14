@@ -7,6 +7,7 @@ namespace SDL2Game.Core.Networking;
 
 public class NetworkExample
 {
+    private const int PORT = 6969;
     private INetworkService m_networkService;
     
     public NetworkExample(INetworkService networkService)
@@ -30,18 +31,33 @@ public class NetworkExample
         EventHub.Subscribe<OnClientStatusChanged>(OnClientStatusChanged);
         EventHub.Subscribe<OnServerStatusChanged>(OnServerStatusChanged);
         EventHub.Subscribe<OnServerClientConnectionStatus>(OnServerClientConnectionStatus);
+        
+        EventHub.Subscribe<OnClientMessageRecieved>(OnClientMessageRecieved);
+        EventHub.Subscribe<OnServerMessageRecieved>(OnServerMessageRecieved);
+    }
+
+    private void OnServerMessageRecieved(object? sender, OnServerMessageRecieved e)
+    {
+        var message = NetHelper.ParseReceivedData(e.Data.RawBytes);
+        Debug.Log($"<color=magenta>SERVER:</color> <color=yellow>Recieved</color> {message.Message}");
+    }
+
+    private void OnClientMessageRecieved(object? sender, OnClientMessageRecieved e)
+    {
+        var message = NetHelper.ParseReceivedData(e.Data.RawBytes);
+        Debug.Log($"<color=blue>CLIENT:</color> <color=yellow>Recieved</color> {message.Message}");
     }
 
     private async Task StartServer()
     {
-        await m_networkService.Server.Start(6969);
+        await m_networkService.Server.Start(PORT);
     }
 
     private async Task ClientConnection()
     {
         try
         {
-            await m_networkService.Client.Connect("127.0.0.1", 6969);
+            await m_networkService.Client.Connect("127.0.0.1", PORT);
         }
         catch (Exception ex)
         {
