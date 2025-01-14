@@ -16,13 +16,13 @@ public class AudioSynthesizer
     private float m_smoothingFactor; // Smoothing factor between 0.1 and 0.3
     
     private int m_windowWidth, m_windowHeight;
-    private IServiceAudioLoader m_audioLoader;
+    private IAudioLoaderService m_audioLoaderService;
     
-    public AudioSynthesizer(int startWindowWidth, int startWindowHeight, IServiceAudioLoader audioLoader)
+    public AudioSynthesizer(int startWindowWidth, int startWindowHeight, IAudioLoaderService audioLoader)
     {
         m_windowWidth = startWindowWidth;
         m_windowHeight = startWindowHeight;
-        m_audioLoader = audioLoader;
+        m_audioLoaderService = audioLoader;
     }
 
     public void Initialize(int rectSpacing = 1, int rectWidth = 3, int rectMaxHeight = 40, float bandIntensity = 1.75f, float smoothingFactor = 0.3f)
@@ -34,7 +34,7 @@ public class AudioSynthesizer
         m_rectWidth = rectWidth;
 
         m_maxAmplitude = 0f;
-        m_previousHeights = new float[m_audioLoader.FrequencyBands.Count];
+        m_previousHeights = new float[m_audioLoaderService.FrequencyBands.Count];
         m_smoothingFactor = smoothingFactor; // Smoothing factor between 0.1 and 0.3
         // m_initialRectStartY = m_windowHeight / 2;//200; //(int)(m_maxRectHeight / 1.75f + m_maxRectHeight / 2);
         
@@ -43,15 +43,15 @@ public class AudioSynthesizer
 
     public void Render(nint renderer, float minHue = 0.7f, float maxHue = 0.85f)
     {
-        var frequencyBands = m_audioLoader.FrequencyBands;
+        var frequencyBands = m_audioLoaderService.FrequencyBands;
         var bandRectSize = (m_rectWidth + m_rectSpacing) * frequencyBands.Count;
         var initialRectStartY = m_windowHeight / 2 - m_maxRectHeight / 2 - 200;
         var initialRectStartX = m_windowWidth / 2 - bandRectSize / 2;//400;
         // initialRectStartX -= m_windowWidth - bandRectSize / 2;
 
-        foreach (var bandPair in m_audioLoader.FrequencyBands)
+        foreach (var bandPair in m_audioLoaderService.FrequencyBands)
         {
-            var bandAmplitude = m_audioLoader.GetAmplitudeByName(bandPair.Key);
+            var bandAmplitude = m_audioLoaderService.GetAmplitudeByName(bandPair.Key);
             if (bandAmplitude > m_maxAmplitude)
             {
                 m_maxAmplitude = bandAmplitude;
@@ -60,7 +60,7 @@ public class AudioSynthesizer
 
         foreach (var bandPair in frequencyBands)
         {
-            var amp = m_audioLoader.GetAmplitudeByName(bandPair.Key);
+            var amp = m_audioLoaderService.GetAmplitudeByName(bandPair.Key);
             var bandIndex = int.Parse(bandPair.Key);
             var bandAmplitude = amp * m_bandIntensityMod;
             var targetHeight = (int)((bandAmplitude / m_maxAmplitude) * m_maxRectHeight);

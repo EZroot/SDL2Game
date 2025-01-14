@@ -13,9 +13,9 @@ namespace SDL2Game.Core.Gui;
 public class GuiExample
 {
     private bool m_showDebugConsole;
-    private IServiceSysInfo m_sysInfo;
-    private IServiceGuiRenderService m_guiRenderService;
-    private IServiceGuiWindowBuilder m_guiWindowBuilder;
+    private ISysInfo m_sysInfo;
+    private IGuiRenderService m_guiRenderService;
+    private IGuiWindowBuilder m_guiWindowBuilder;
     private IVariableBinder m_variableBinder;
 
     private ImGuiDockData m_guiDockerData;
@@ -26,7 +26,7 @@ public class GuiExample
     private GuiStringQuery<int> m_guiStringQuery_PokemonCount;
     private GuiStringQuery<string> m_guiStringQuery_MouseOverLabel;
     
-    public GuiExample(IServiceGuiRenderService guiRenderService, IServiceGuiWindowBuilder guiWindowBuilder, IVariableBinder guiVarBinder, IServiceSysInfo sysInfo)
+    public GuiExample(IGuiRenderService guiRenderService, IGuiWindowBuilder guiWindowBuilder, IVariableBinder guiVarBinder, ISysInfo sysInfo)
     {
         m_sysInfo = sysInfo;
         m_guiRenderService = guiRenderService;

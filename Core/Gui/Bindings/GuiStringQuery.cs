@@ -33,7 +33,7 @@ public class GuiStringQuery<T> : GuiBase where T : IConvertible
         BindQuery();
     }
 
-    public void DrawQuery(IServiceGuiWindowBuilder guiWindowBuilder)
+    public void DrawQuery(IGuiWindowBuilder guiWindowBuilder)
     {
         guiWindowBuilder.Draw(GUI_ID);
     }

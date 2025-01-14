@@ -27,16 +27,16 @@ public class MyGame : IGame
     #region Services
 
     private IServiceWindowService m_windowService;
-    private IServiceRenderService m_renderService;
-    private IServiceGuiRenderService m_guiRenderService;
-    private IServiceGuiWindowBuilder m_guiWindowBuilder;
+    private IRenderService m_renderService;
+    private IGuiRenderService m_guiRenderService;
+    private IGuiWindowBuilder m_guiWindowBuilder;
     private IVariableBinder m_guiVarBinder;
-    private IServiceAssetManager m_assetManager;
-    private IServiceAudioLoader m_audioLoader;
-    private IServiceWindowConfig m_windowConfig;
-    private IServiceCameraService m_cameraService;
-    private IServicePhysicsService m_physicsService;
-    private IServiceSysInfo m_sysInfo;
+    private IAssetService m_assetService;
+    private IAudioLoaderService m_audioLoaderService;
+    private IWindowConfig m_windowConfig;
+    private ICameraService m_cameraService;
+    private IPhysicsService m_physicsService;
+    private ISysInfo m_sysInfo;
 
     #endregion
 
@@ -52,15 +52,15 @@ public class MyGame : IGame
     {
         #region Setup Services
         m_windowService = serviceProvider.GetService<IServiceWindowService>() ?? throw new InvalidOperationException("IServiceWindowService is required but not registered.");
-        m_renderService = serviceProvider.GetService<IServiceRenderService>() ?? throw new InvalidOperationException("IServiceRenderService is required but not registered.");
-        m_guiRenderService = serviceProvider.GetService<IServiceGuiRenderService>() ?? throw new InvalidOperationException("IServiceGuiRenderService is required but not registered.");
-        m_assetManager = serviceProvider.GetService<IServiceAssetManager>() ?? throw new InvalidOperationException("IServiceAssetManager is required but not registered.");
-        m_audioLoader = serviceProvider.GetService<IServiceAudioLoader>() ?? throw new InvalidOperationException("IServiceAudioLoader is required but not registered.");
-        m_cameraService = serviceProvider.GetService<IServiceCameraService>() ?? throw new InvalidOperationException("IServiceCameraService is required but not registered.");
-        m_windowConfig = serviceProvider.GetService<IServiceWindowConfig>() ?? throw new InvalidOperationException("IServiceWindowConfig is required but not registered.");
-        m_physicsService = serviceProvider.GetService<IServicePhysicsService>() ?? throw new InvalidOperationException("IServicePhysicsService is required but not registered.");
-        m_sysInfo = serviceProvider.GetService<IServiceSysInfo>() ?? throw new InvalidOperationException("IServiceSysInfo is required but not registered.");
-        m_guiWindowBuilder = serviceProvider.GetService<IServiceGuiWindowBuilder>() ?? throw new InvalidOperationException("IServiceGuiWindowBuilder is required but not registered.");
+        m_renderService = serviceProvider.GetService<IRenderService>() ?? throw new InvalidOperationException("IServiceRenderService is required but not registered.");
+        m_guiRenderService = serviceProvider.GetService<IGuiRenderService>() ?? throw new InvalidOperationException("IServiceGuiRenderService is required but not registered.");
+        m_assetService = serviceProvider.GetService<IAssetService>() ?? throw new InvalidOperationException("IServiceAssetManager is required but not registered.");
+        m_audioLoaderService = serviceProvider.GetService<IAudioLoaderService>() ?? throw new InvalidOperationException("IServiceAudioLoader is required but not registered.");
+        m_cameraService = serviceProvider.GetService<ICameraService>() ?? throw new InvalidOperationException("IServiceCameraService is required but not registered.");
+        m_windowConfig = serviceProvider.GetService<IWindowConfig>() ?? throw new InvalidOperationException("IServiceWindowConfig is required but not registered.");
+        m_physicsService = serviceProvider.GetService<IPhysicsService>() ?? throw new InvalidOperationException("IServicePhysicsService is required but not registered.");
+        m_sysInfo = serviceProvider.GetService<ISysInfo>() ?? throw new InvalidOperationException("IServiceSysInfo is required but not registered.");
+        m_guiWindowBuilder = serviceProvider.GetService<IGuiWindowBuilder>() ?? throw new InvalidOperationException("IServiceGuiWindowBuilder is required but not registered.");
         m_guiVarBinder = serviceProvider.GetService<IVariableBinder>() ?? throw new InvalidOperationException("IVariableBinder is required but not registered.");
         #endregion
 
@@ -71,19 +71,19 @@ public class MyGame : IGame
     private void InitializeInternal()
     {
         m_guiExample = new GuiExample(m_guiRenderService, m_guiWindowBuilder, m_guiVarBinder, m_sysInfo);
-        m_physicsExample = new PhysicsExample(m_physicsService, m_renderService, m_assetManager, m_windowConfig);
-        m_pokemonHandler = new PokemonHandler(m_audioLoader, m_assetManager, m_cameraService);
+        m_physicsExample = new PhysicsExample(m_physicsService, m_renderService, m_assetService, m_windowConfig);
+        m_pokemonHandler = new PokemonHandler(m_audioLoaderService, m_assetService, m_cameraService);
         m_audioSynthesizer = new AudioSynthesizer(
             m_windowConfig.Settings.Width,
             m_windowConfig.Settings.Height,
-            m_audioLoader);
+            m_audioLoaderService);
 
         m_pokemonHandler.Initialize(m_renderService.RenderPtr);
         m_audioSynthesizer.Initialize(rectWidth: 4, rectMaxHeight: 75, rectSpacing: 4, bandIntensity: 3f);
 
-        var songPath = GameHelper.SOUND_FOLDER + "/skidrow.wav";//"/pokemon.wav";  
-        var song = m_assetManager.LoadSound(songPath);
-        m_assetManager.PlaySound(song, GameHelper.GLOBAL_VOLUME);
+        var songPath = GameHelper.SOUND_FOLDER + "/pokemon.wav"; //"/skidrow.wav";//
+        var song = m_assetService.LoadSound(songPath);
+        m_assetService.PlaySound(song, GameHelper.GLOBAL_VOLUME);
     }
 
     public void Update(float deltaTime)

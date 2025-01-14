@@ -14,10 +14,10 @@ namespace SDL2Game.Core.Physics;
 
 public class PhysicsExample
 {
-    private IServicePhysicsService m_physicsService;
-    private IServiceRenderService m_renderService;
-    private IServiceAssetManager m_assetManager;
-    private IServiceWindowConfig m_windowConfig;
+    private IPhysicsService m_physicsService;
+    private IRenderService m_renderService;
+    private IAssetService m_assetService;
+    private IWindowConfig m_windowConfig;
 
     // Physics gameobject
     private GameObject m_boxObject;
@@ -27,13 +27,13 @@ public class PhysicsExample
     private bool isDragging = false;
     private int dragStartX, dragStartY, prevMouseX, prevMouseY;
 
-    public PhysicsExample(IServicePhysicsService physicsService,
-        IServiceRenderService renderService, 
-        IServiceAssetManager assetManager,
-        IServiceWindowConfig windowConfig)
+    public PhysicsExample(IPhysicsService physicsService,
+        IRenderService renderService, 
+        IAssetService assetManager,
+        IWindowConfig windowConfig)
     {
         m_renderService = renderService;
-        m_assetManager = assetManager;
+        m_assetService = assetManager;
         m_physicsService = physicsService;
         m_windowConfig = windowConfig;
     }
@@ -54,7 +54,7 @@ public class PhysicsExample
     {
         foreach (var box in m_boxes)
         {
-            box.Render(renderPtr, m_assetManager);
+            box.Render(renderPtr, m_assetService);
         }
     }
 
@@ -120,7 +120,7 @@ public class PhysicsExample
         {
             Debug.Log("<color=yellow>SPACE pressed! Spawning 10 'jigglypuff' boxes...</color>");
 
-            var boxTexture = m_assetManager.LoadTexture(m_renderService.RenderPtr, GameHelper.RESOURCES_FOLDER + "/jigglypuff.png");
+            var boxTexture = m_assetService.LoadTexture(m_renderService.RenderPtr, GameHelper.RESOURCES_FOLDER + "/jigglypuff.png");
             Debug.Log($"Loaded Texture Id: {boxTexture.Id}, Size: {boxTexture.Width}x{boxTexture.Height}");
 
             var rnd = new Random();

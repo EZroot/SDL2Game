@@ -65,8 +65,8 @@ namespace SDL2Game.Core.Pokemans.GameObjects
         public override void Render
         (
             nint renderer,
-            IServiceAssetManager assetManager,
-            IServiceCameraService cameraService = null
+            IAssetService assetManager,
+            ICameraService cameraService = null
         )
         {
             // Example: do some pre-render adjustments

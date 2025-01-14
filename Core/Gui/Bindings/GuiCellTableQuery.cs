@@ -33,7 +33,7 @@ public class GuiCellTableQuery : GuiBase
         BindDebugQuery();
     }
 
-    public void DrawDebugQuery(IServiceGuiWindowBuilder guiWindowBuilder)
+    public void DrawDebugQuery(IGuiWindowBuilder guiWindowBuilder)
     {
         guiWindowBuilder.Draw(CELL_TABLE);
     }
