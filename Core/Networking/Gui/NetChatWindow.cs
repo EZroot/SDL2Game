@@ -43,6 +43,7 @@ namespace SDL2Game.Core.Networking.Gui
         private ClientStatus m_clientNetStatus = ClientStatus.Disconnected;
         private ServerStatus m_serverNetStatus = ServerStatus.Ended;
 
+        private bool m_isServerStreaming = false;
         private int m_clockStream = 0;
         private int m_clockStreamServer = 0;
         
@@ -75,7 +76,7 @@ namespace SDL2Game.Core.Networking.Gui
 
         private void Update()
         {
-            if (m_networkService.Server.IsServer)
+            if (m_networkService.Server.IsServer && m_isServerStreaming)
             {
                 m_clockStreamServer += (int)Time.TotalTime;
 
@@ -169,6 +170,12 @@ namespace SDL2Game.Core.Networking.Gui
                     }
                     
                     ImGui.Text("Streaming example");
+                    ImGui.SameLine();
+                    if (ImGui.Checkbox("Enable Net Streaming", ref m_isServerStreaming))
+                    {
+                        
+                    }
+                    
                     ImGui.Separator();
                     ImGui.Text($"Server: {m_clockStreamServer} Client: {m_clockStream}");
 
