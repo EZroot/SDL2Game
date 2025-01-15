@@ -95,7 +95,6 @@ namespace SDL2Game.Core.Pokemans
 
             foreach (var pokemon in m_pokemonList)
             {
-                pokemon.Rotation += Time.DeltaTime * 6;
                 pokemon.Update(deltaTime);
             }
         }
@@ -133,7 +132,7 @@ namespace SDL2Game.Core.Pokemans
 
                 Vector2 originalPos = pokemon.Position;
                 pokemon.Position = new Vector2(originalPos.X + bounceX, originalPos.Y + bounceY);
-
+                pokemon.Rotation += bounceX * MathHelper.TwoPi * Time.DeltaTime;
                 pokemon.Render(renderer, m_cameraService);
 
                 // pokemon.Position = originalPos;
