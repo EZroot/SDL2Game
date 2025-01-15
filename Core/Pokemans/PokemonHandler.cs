@@ -1,11 +1,9 @@
 using System.Numerics;
 using SDL2;
-using SDL2Engine.Core.Addressables;
 using SDL2Engine.Core.Addressables.Data;
 using SDL2Engine.Core.Addressables.Interfaces;
 using SDL2Engine.Core.Input;
 using SDL2Engine.Core.Rendering.Interfaces;
-using SDL2Game.Core.Pokemans.GameObjects;
 using SDL2Game.Core.Utils;
 
 namespace SDL2Game.Core.Pokemans
@@ -18,8 +16,8 @@ namespace SDL2Game.Core.Pokemans
         private readonly IImageService m_imageService;
         private readonly ICameraService m_cameraService;
 
-        private Pokemon m_ash;
-        private List<Pokemon> m_pokemonList = new List<Pokemon>();
+        private GameObject m_ash;
+        private List<GameObject> m_pokemonList = new List<GameObject>();
 
         private float m_currentScaleAsh;
 
@@ -35,12 +33,11 @@ namespace SDL2Game.Core.Pokemans
         public void Initialize(nint renderer)
         {
             var ashTexture = m_imageService.LoadTexture(renderer, GameHelper.RESOURCES_FOLDER + "/ashh.png");
-            m_ash = new Pokemon(
-                name: "Ash",
-                textureId: ashTexture.Id,
-                originalWidth: ashTexture.Width,
-                originalHeight: ashTexture.Height,
-                initialPosition: new Vector2(48, 174)
+            var ashSprite = new StaticSprite(ashTexture.Texture, ashTexture.Width, ashTexture.Height);
+            m_ash = new GameObject(
+                sprite: ashSprite,
+                scale: new Vector2(ashTexture.Width, ashTexture.Height),
+                position: new Vector2(48, 174)
             );
 
             var texturePaths = new[]
@@ -62,6 +59,7 @@ namespace SDL2Game.Core.Pokemans
             for (int i = 0; i < allTextures.Count; i++)
             {
                 var texData = allTextures[i];
+                
                 int row = i / 10;
                 int col = i % 10;
                 var spacing = -20;
@@ -70,13 +68,12 @@ namespace SDL2Game.Core.Pokemans
                     330 + (col * (texData.Width + spacing)), 
                     0 + (row * (texData.Height + spacing))
                 );
-
-                var pokeObj = new Pokemon(
-                    name: $"Pokemon_{i}",
-                    textureId: texData.Id,
-                    originalWidth: texData.Width,
-                    originalHeight: texData.Height,
-                    initialPosition: startPos
+                
+                var sprite = new StaticSprite(texData.Texture, texData.Width, texData.Height);
+                var pokeObj = new GameObject(
+                    sprite: sprite,
+                    position: startPos,
+                    scale: new Vector2(texData.Width,texData.Height)
                 );
 
                 m_pokemonList.Add(pokeObj);
@@ -98,6 +95,7 @@ namespace SDL2Game.Core.Pokemans
 
             foreach (var pokemon in m_pokemonList)
             {
+                pokemon.Rotation += Time.DeltaTime * 6;
                 pokemon.Update(deltaTime);
             }
         }
@@ -136,7 +134,7 @@ namespace SDL2Game.Core.Pokemans
                 Vector2 originalPos = pokemon.Position;
                 pokemon.Position = new Vector2(originalPos.X + bounceX, originalPos.Y + bounceY);
 
-                pokemon.Render(renderer, m_imageService, m_cameraService);
+                pokemon.Render(renderer, m_cameraService);
 
                 // pokemon.Position = originalPos;
             }
@@ -147,7 +145,7 @@ namespace SDL2Game.Core.Pokemans
 
             float normalizedAshScale = m_currentScaleAsh; 
             m_ash.Scale = new Vector2(normalizedAshScale, normalizedAshScale);
-            m_ash.Render(renderer, m_imageService, m_cameraService);
+            m_ash.Render(renderer, m_cameraService);
         }
 
         /// <summary>
@@ -155,15 +153,15 @@ namespace SDL2Game.Core.Pokemans
         /// </summary>
         public void CleanUp()
         {
-            if (m_ash.TextureId != 0)
-            {
-                m_imageService.UnloadTexture(m_ash.TextureId);
-            }
-
-            foreach (var poke in m_pokemonList)
-            {
-                m_imageService.UnloadTexture(poke.TextureId);
-            }
+            // if (m_ash.TextureId != 0)
+            // {
+            //     m_imageService.UnloadTexture(m_ash.TextureId);
+            // }
+            //
+            // foreach (var poke in m_pokemonList)
+            // {
+            //     m_imageService.UnloadTexture(poke.TextureId);
+            // }
         }
     }
 }

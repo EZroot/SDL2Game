@@ -1,6 +1,7 @@
 using System.Numerics;
 using Box2DSharp.Dynamics;
 using SDL2;
+using SDL2Engine.Core.Addressables.Data;
 using SDL2Engine.Core.Addressables.Interfaces;
 using SDL2Engine.Core.CoreSystem.Configuration;
 using SDL2Engine.Core.Input;
@@ -54,7 +55,7 @@ public class PhysicsExample
     {
         foreach (var box in m_boxes)
         {
-            box.Render(renderPtr, m_imageService);
+            box.Render(renderPtr);
         }
     }
 
@@ -123,6 +124,8 @@ public class PhysicsExample
             var boxTexture = m_imageService.LoadTexture(m_renderService.RenderPtr, GameHelper.RESOURCES_FOLDER + "/jigglypuff.png");
             Debug.Log($"Loaded Texture Id: {boxTexture.Id}, Size: {boxTexture.Width}x{boxTexture.Height}");
 
+            var sprite = new StaticSprite(boxTexture.Texture, boxTexture.Width, boxTexture.Height);
+            
             var rnd = new Random();
             int numberOfBoxes = 1;
             for (int i = 0; i < numberOfBoxes; i++)
@@ -130,17 +133,10 @@ public class PhysicsExample
                 float xPos = rnd.Next(150, m_windowConfig.Settings.Width - 150);
                 float yPos = 100; // start them near the top
 
-                var boxObject = new GameObject
-                {
-                    TextureId = boxTexture.Id,
-                    Position = new Vector2(xPos, yPos),
-                    OriginalWidth = boxTexture.Width,
-                    OriginalHeight = boxTexture.Height,
-                    Scale = Vector2.One
-                };
+                var boxObject = new GameObject(sprite: sprite, position: new Vector2(xPos, yPos), scale: Vector2.One);
 
-                float widthMeters = boxObject.OriginalWidth / 3;
-                float heightMeters = boxObject.OriginalHeight / 3;
+                float widthMeters = boxObject.Sprite.Width / 3;
+                float heightMeters = boxObject.Sprite.Height / 3;
 
                 Debug.Log($"Box #{i} -> Pos({xPos}, {yPos}), Size({widthMeters}x{heightMeters}), Registering as DynamicBody...");
 
