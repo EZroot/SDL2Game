@@ -1,6 +1,7 @@
 using System.Numerics;
 using SDL2;
 using SDL2Engine.Core.Addressables;
+using SDL2Engine.Core.Addressables.Data;
 using SDL2Engine.Core.Addressables.Interfaces;
 using SDL2Engine.Core.Input;
 using SDL2Engine.Core.Rendering.Interfaces;
@@ -13,8 +14,8 @@ namespace SDL2Game.Core.Pokemans
     {
         private const int POKEMON_MULTIPLIER = 2;
         
-        private readonly IAudioLoaderService m_audioLoaderService;
-        private readonly IAssetService m_assetService;
+        private readonly IAudioService m_audioService;
+        private readonly IImageService m_imageService;
         private readonly ICameraService m_cameraService;
 
         private Pokemon m_ash;
@@ -22,18 +23,18 @@ namespace SDL2Game.Core.Pokemans
 
         private float m_currentScaleAsh;
 
-        public PokemonHandler(IAudioLoaderService audioLoader,
-                        IAssetService assetManager,
+        public PokemonHandler(IAudioService audioLoader,
+            IImageService assetManager,
                         ICameraService cameraService)
         {
-            m_audioLoaderService = audioLoader;
-            m_assetService = assetManager;
+            m_audioService = audioLoader;
+            m_imageService = assetManager;
             m_cameraService = cameraService;
         }
         
         public void Initialize(nint renderer)
         {
-            var ashTexture = m_assetService.LoadTexture(renderer, GameHelper.RESOURCES_FOLDER + "/ashh.png");
+            var ashTexture = m_imageService.LoadTexture(renderer, GameHelper.RESOURCES_FOLDER + "/ashh.png");
             m_ash = new Pokemon(
                 name: "Ash",
                 textureId: ashTexture.Id,
@@ -48,12 +49,12 @@ namespace SDL2Game.Core.Pokemans
                 "/squirtle.png",  "/ninetales.png","/poliwhirl.png"
             };
 
-            var allTextures = new List<AssetService.TextureData>();
+            var allTextures = new List<TextureData>();
             for (int r = 0; r < POKEMON_MULTIPLIER; r++) 
             {
                 foreach (var path in texturePaths)
                 {
-                    var tex = m_assetService.LoadTexture(renderer, GameHelper.RESOURCES_FOLDER + path);
+                    var tex = m_imageService.LoadTexture(renderer, GameHelper.RESOURCES_FOLDER + path);
                     allTextures.Add(tex);
                 }
             }
@@ -108,7 +109,7 @@ namespace SDL2Game.Core.Pokemans
             
             for (int i = 4; i < 16; i++)
             {
-                amplitude += m_audioLoaderService.GetAmplitudeByName(i.ToString());
+                amplitude += m_audioService.GetAmplitudeByName(i.ToString());
             }
 
             float pokemansBaseScale = 0.5f;
@@ -119,7 +120,7 @@ namespace SDL2Game.Core.Pokemans
                 var pokemon = m_pokemonList[i];
 
                 // For “bass” amplitude
-                float bassAmplitude = m_audioLoaderService.GetAmplitudeByName("0") + m_audioLoaderService.GetAmplitudeByName("1");
+                float bassAmplitude = m_audioService.GetAmplitudeByName("0") + m_audioService.GetAmplitudeByName("1");
 
                 float pulseOffset = (i * 0.5f) % MathHelper.TwoPi;
                 float dynamicScaleFactor = pokemansBaseScale 
@@ -135,7 +136,7 @@ namespace SDL2Game.Core.Pokemans
                 Vector2 originalPos = pokemon.Position;
                 pokemon.Position = new Vector2(originalPos.X + bounceX, originalPos.Y + bounceY);
 
-                pokemon.Render(renderer, m_assetService, m_cameraService);
+                pokemon.Render(renderer, m_imageService, m_cameraService);
 
                 // pokemon.Position = originalPos;
             }
@@ -146,7 +147,7 @@ namespace SDL2Game.Core.Pokemans
 
             float normalizedAshScale = m_currentScaleAsh; 
             m_ash.Scale = new Vector2(normalizedAshScale, normalizedAshScale);
-            m_ash.Render(renderer, m_assetService, m_cameraService);
+            m_ash.Render(renderer, m_imageService, m_cameraService);
         }
 
         /// <summary>
@@ -156,12 +157,12 @@ namespace SDL2Game.Core.Pokemans
         {
             if (m_ash.TextureId != 0)
             {
-                m_assetService.UnloadTexture(m_ash.TextureId);
+                m_imageService.UnloadTexture(m_ash.TextureId);
             }
 
             foreach (var poke in m_pokemonList)
             {
-                m_assetService.UnloadTexture(poke.TextureId);
+                m_imageService.UnloadTexture(poke.TextureId);
             }
         }
     }

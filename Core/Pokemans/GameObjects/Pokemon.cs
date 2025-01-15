@@ -65,7 +65,7 @@ namespace SDL2Game.Core.Pokemans.GameObjects
         public override void Render
         (
             nint renderer,
-            IAssetService assetManager,
+            IImageService imageService,
             ICameraService cameraService = null
         )
         {
@@ -75,7 +75,7 @@ namespace SDL2Game.Core.Pokemans.GameObjects
             // Scale = new Vector2(1.0f + pulse * AudioAmplitudeFactor);
 
             // Then call the base render to actually draw
-            base.Render(renderer, assetManager, cameraService);
+            base.Render(renderer, imageService, cameraService);
         }
     }
 }

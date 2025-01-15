@@ -109,7 +109,6 @@ namespace SDL2Game.Core.Networking.Gui
                     {
                         if (ImGui.Button("Options"))
                         {
-                            // Implement options if needed
                         }
                         ImGui.Separator();
 
@@ -183,7 +182,6 @@ namespace SDL2Game.Core.Networking.Gui
 
                     if (ImGui.InputText("##SetUsernameInput", ref m_usernameBuffer, 24))
                     {
-                        // Handle username input if needed
                     }
 
                     ImGui.SameLine();
@@ -193,7 +191,7 @@ namespace SDL2Game.Core.Networking.Gui
                         if (!string.IsNullOrWhiteSpace(m_usernameBuffer))
                         {
                             m_username = m_usernameBuffer;
-                            m_usernameBuffer = ""; // Clear buffer after setting
+                            m_usernameBuffer = ""; 
                         }
                     }
 
@@ -217,7 +215,6 @@ namespace SDL2Game.Core.Networking.Gui
 
                     ImGui.SameLine();
 
-                    // Server Messages
                     ImGui.BeginChild("ServerMsgs", new Vector2(childWidth - 64, childHeight), ImGuiChildFlags.Borders);
                     {
                         ImGui.Text($"Server Chat (Status: {m_serverNetStatus})");
@@ -260,7 +257,6 @@ namespace SDL2Game.Core.Networking.Gui
 
                     if (ImGui.InputText("##UserChat", ref m_chatBuffer, 1024))
                     {
-                        // Handle chat input if needed
                     }
 
                     ImGui.SameLine();

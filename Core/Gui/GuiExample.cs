@@ -92,27 +92,32 @@ public class GuiExample
     {
         if (ImGui.BeginMainMenuBar())
         {
-            if (ImGui.Button("File"))
+            if (ImGui.SmallButton("File"))
             {
             }
-
-            if (ImGui.Button("Edit"))
+            ImGui.Separator();
+            
+            if (ImGui.SmallButton("Edit"))
             {
             }
+            ImGui.Separator();
 
-            if (ImGui.Button("Help"))
+            if (ImGui.SmallButton("Help"))
             {
             }
+            ImGui.Separator();
 
-            if (ImGui.Button("Debug Console"))
+            if (ImGui.SmallButton("Debug Console"))
             {
                 m_showDebugConsole = !m_showDebugConsole;
             }
+            ImGui.Separator();
 
-            if (ImGui.Button("Network Chat"))
+            if (ImGui.SmallButton("Network Chat"))
             {
                 NetGuiWindowBindings.IsShowingNetWindow = !NetGuiWindowBindings.IsShowingNetWindow;
             }
+            ImGui.Separator();
 
             var fps = $"Fps: {Time.Fps:F2} (delta: {Time.DeltaTime:F2})";
             var fullHeader = $"Mouse: {InputManager.MouseX}x{InputManager.MouseY} Driver: {m_sysInfo.SDLRenderInfo.CurrentRenderDriver} {fps}";

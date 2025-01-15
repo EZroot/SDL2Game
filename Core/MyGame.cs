@@ -1,14 +1,9 @@
-using System.Numerics;
-using Box2DSharp.Dynamics;
 using Microsoft.Extensions.DependencyInjection;
-using SDL2;
 using SDL2Engine.Core;
 using SDL2Engine.Core.Addressables.Interfaces;
 using SDL2Engine.Core.CoreSystem.Configuration;
 using SDL2Engine.Core.GuiRenderer;
-using SDL2Engine.Core.GuiRenderer.Helpers;
 using SDL2Engine.Core.GuiRenderer.Interfaces;
-using SDL2Engine.Core.Input;
 using SDL2Engine.Core.Networking.Interfaces;
 using SDL2Engine.Core.Physics.Interfaces;
 using SDL2Engine.Core.Rendering.Interfaces;
@@ -33,8 +28,8 @@ public class MyGame : IGame
     private IGuiRenderService m_guiRenderService;
     private IGuiWindowBuilder m_guiWindowBuilder;
     private IVariableBinder m_guiVarBinder;
-    private IAssetService m_assetService;
-    private IAudioLoaderService m_audioLoaderService;
+    private IAudioService m_audioService;
+    private IImageService m_imageService;
     private IWindowConfig m_windowConfig;
     private ICameraService m_cameraService;
     private IPhysicsService m_physicsService;
@@ -58,8 +53,8 @@ public class MyGame : IGame
         m_windowService = serviceProvider.GetService<IServiceWindowService>() ?? throw new InvalidOperationException("IServiceWindowService is required but not registered.");
         m_renderService = serviceProvider.GetService<IRenderService>() ?? throw new InvalidOperationException("IServiceRenderService is required but not registered.");
         m_guiRenderService = serviceProvider.GetService<IGuiRenderService>() ?? throw new InvalidOperationException("IServiceGuiRenderService is required but not registered.");
-        m_assetService = serviceProvider.GetService<IAssetService>() ?? throw new InvalidOperationException("IServiceAssetManager is required but not registered.");
-        m_audioLoaderService = serviceProvider.GetService<IAudioLoaderService>() ?? throw new InvalidOperationException("IServiceAudioLoader is required but not registered.");
+        m_audioService = serviceProvider.GetService<IAudioService>() ?? throw new InvalidOperationException("IAudioService is required but not registered.");
+        m_imageService = serviceProvider.GetService<IImageService>() ?? throw new InvalidOperationException("IImageService is required but not registered.");
         m_cameraService = serviceProvider.GetService<ICameraService>() ?? throw new InvalidOperationException("IServiceCameraService is required but not registered.");
         m_windowConfig = serviceProvider.GetService<IWindowConfig>() ?? throw new InvalidOperationException("IServiceWindowConfig is required but not registered.");
         m_physicsService = serviceProvider.GetService<IPhysicsService>() ?? throw new InvalidOperationException("IServicePhysicsService is required but not registered.");
@@ -76,20 +71,20 @@ public class MyGame : IGame
     private void InitializeInternal()
     {
         m_guiExample = new GuiExample(m_guiRenderService, m_guiWindowBuilder, m_guiVarBinder, m_sysInfo);
-        m_physicsExample = new PhysicsExample(m_physicsService, m_renderService, m_assetService, m_windowConfig);
-        m_pokemonHandler = new PokemonHandler(m_audioLoaderService, m_assetService, m_cameraService);
+        m_physicsExample = new PhysicsExample(m_physicsService, m_renderService, m_imageService, m_windowConfig);
+        m_pokemonHandler = new PokemonHandler(m_audioService, m_imageService, m_cameraService);
         m_audioSynthesizer = new AudioSynthesizer(
             m_windowConfig.Settings.Width,
             m_windowConfig.Settings.Height,
-            m_audioLoaderService);
+            m_audioService);
         m_networkExample = new NetworkExample(m_networkService, m_guiRenderService, m_guiWindowBuilder, m_guiVarBinder);
         
         m_pokemonHandler.Initialize(m_renderService.RenderPtr);
         m_audioSynthesizer.Initialize(rectWidth: 4, rectMaxHeight: 75, rectSpacing: 4, bandIntensity: 3f);
 
         var songPath = GameHelper.SOUND_FOLDER + "/skidrow.wav";//"/pokemon.wav";"
-        var song = m_assetService.LoadSound(songPath);
-        m_assetService.PlaySound(song, GameHelper.GLOBAL_VOLUME);
+        var song = m_audioService.LoadSound(songPath);
+        m_audioService.PlaySound(song, GameHelper.GLOBAL_VOLUME);
         
         m_networkExample.Initialize();
     }

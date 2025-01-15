@@ -16,7 +16,7 @@ public class PhysicsExample
 {
     private IPhysicsService m_physicsService;
     private IRenderService m_renderService;
-    private IAssetService m_assetService;
+    private IImageService m_imageService;
     private IWindowConfig m_windowConfig;
 
     // Physics gameobject
@@ -29,11 +29,11 @@ public class PhysicsExample
 
     public PhysicsExample(IPhysicsService physicsService,
         IRenderService renderService, 
-        IAssetService assetManager,
+        IImageService assetManager,
         IWindowConfig windowConfig)
     {
         m_renderService = renderService;
-        m_assetService = assetManager;
+        m_imageService = assetManager;
         m_physicsService = physicsService;
         m_windowConfig = windowConfig;
     }
@@ -54,7 +54,7 @@ public class PhysicsExample
     {
         foreach (var box in m_boxes)
         {
-            box.Render(renderPtr, m_assetService);
+            box.Render(renderPtr, m_imageService);
         }
     }
 
@@ -120,7 +120,7 @@ public class PhysicsExample
         {
             Debug.Log("<color=yellow>SPACE pressed! Spawning 10 'jigglypuff' boxes...</color>");
 
-            var boxTexture = m_assetService.LoadTexture(m_renderService.RenderPtr, GameHelper.RESOURCES_FOLDER + "/jigglypuff.png");
+            var boxTexture = m_imageService.LoadTexture(m_renderService.RenderPtr, GameHelper.RESOURCES_FOLDER + "/jigglypuff.png");
             Debug.Log($"Loaded Texture Id: {boxTexture.Id}, Size: {boxTexture.Width}x{boxTexture.Height}");
 
             var rnd = new Random();
