@@ -8,9 +8,9 @@ using SDL2Game.Core.Utils;
 
 namespace SDL2Game.Core.Pokemans
 {
-    public class PokemonHandler
+    public class PinkBoysHandler
     {
-        private const int POKEMON_MULTIPLIER = 2;
+        private const int POKEMON_MULTIPLIER = 20;
         
         private readonly IAudioService m_audioService;
         private readonly IImageService m_imageService;
@@ -21,7 +21,7 @@ namespace SDL2Game.Core.Pokemans
 
         private float m_currentScaleAsh;
 
-        public PokemonHandler(IAudioService audioLoader,
+        public PinkBoysHandler(IAudioService audioLoader,
             IImageService assetManager,
                         ICameraService cameraService)
         {
@@ -32,18 +32,19 @@ namespace SDL2Game.Core.Pokemans
         
         public void Initialize(nint renderer)
         {
-            var ashTexture = m_imageService.LoadTexture(renderer, GameHelper.RESOURCES_FOLDER + "/ashh.png");
-            var ashSprite = new StaticSprite(ashTexture.Texture, ashTexture.Width, ashTexture.Height);
+            var ashTexture = m_imageService.LoadTexture(renderer, GameHelper.RESOURCES_FOLDER + "/pinkboy.png");
+            // var ashSprite = new StaticSprite(ashTexture.Texture, ashTexture.Width, ashTexture.Height);
+            var ashSprite = new AnimatedSprite(ashTexture.Texture, 32, 32, 4, 0.5f);//ashTexture.Width, ashTexture.Height);
             m_ash = new GameObject(
                 sprite: ashSprite,
-                scale: new Vector2(ashTexture.Width, ashTexture.Height),
+                scale: new Vector2(32, 32),
                 position: new Vector2(48, 174)
             );
 
             var texturePaths = new[]
             {
-                "/charizard.png", "/gengar.png", "/jigglypuff.png", "/moltres.png",
-                "/squirtle.png",  "/ninetales.png","/poliwhirl.png"
+                "/pinkboy.png", "/pinkboy.png", "/pinkboy.png", "/pinkboy.png",
+                "/pinkboy.png",  "/pinkboy.png","/pinkboy.png"
             };
 
             var allTextures = new List<TextureData>();
@@ -69,7 +70,8 @@ namespace SDL2Game.Core.Pokemans
                     0 + (row * (texData.Height + spacing))
                 );
                 
-                var sprite = new StaticSprite(texData.Texture, texData.Width, texData.Height);
+                // var sprite = new StaticSprite(texData.Texture, texData.Width, texData.Height);
+                var sprite = new AnimatedSprite(texData.Texture, 32, 32, 4, 0.25f);//ashTexture.Width, ashTexture.Height);
                 var pokeObj = new GameObject(
                     sprite: sprite,
                     position: startPos,
@@ -101,7 +103,7 @@ namespace SDL2Game.Core.Pokemans
         
         public void Render(nint renderer)
         {
-            float baseScale = 0.75f;
+            float baseScale = 5f;
             float amplitude = 0f;
             
             for (int i = 4; i < 16; i++)
