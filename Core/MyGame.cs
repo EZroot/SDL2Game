@@ -5,6 +5,7 @@ using SDL2Engine.Core.CoreSystem.Configuration;
 using SDL2Engine.Core.GuiRenderer;
 using SDL2Engine.Core.GuiRenderer.Interfaces;
 using SDL2Engine.Core.Networking.Interfaces;
+using SDL2Engine.Core.Partitions.Interfaces;
 using SDL2Engine.Core.Physics.Interfaces;
 using SDL2Engine.Core.Rendering.Interfaces;
 using SDL2Engine.Core.Utils;
@@ -38,6 +39,8 @@ public class MyGame : IGame
     
     #endregion
 
+    private IPartitioner m_partitioner;
+    
     private PinkBoysHandler m_pinkBoysHandler;
     private AudioSynthesizer m_audioSynthesizer;
     private GuiExample m_guiExample;
@@ -47,7 +50,7 @@ public class MyGame : IGame
     private float minHue = 0.7f, maxHue = 0.85f;
     private float maxHueSeperation = 0.25f;
 
-    public void Initialize(IServiceProvider serviceProvider)
+    public void Initialize(IServiceProvider serviceProvider, IPartitioner parititioner)
     {
         #region Setup Services
         m_windowService = serviceProvider.GetService<IWindowService>() ?? throw new InvalidOperationException("IServiceWindowService is required but not registered.");
@@ -64,6 +67,8 @@ public class MyGame : IGame
         m_networkService = serviceProvider.GetService<INetworkService>() ?? throw new InvalidOperationException("INetworkService is required but not registered.");
         #endregion
 
+        m_partitioner = parititioner;
+        
         InitializeInternal();
         Debug.Log("Initialized MyGame!");
     }
@@ -72,7 +77,7 @@ public class MyGame : IGame
     {
         m_guiExample = new GuiExample(m_guiRenderService, m_guiWindowBuilder, m_guiVarBinder, m_sysInfo);
         m_physicsExample = new PhysicsExample(m_physicsService, m_renderService, m_imageService, m_windowConfig);
-        m_pinkBoysHandler = new PinkBoysHandler(m_audioService, m_imageService, m_cameraService);
+        m_pinkBoysHandler = new PinkBoysHandler(m_audioService, m_imageService, m_cameraService, m_partitioner);
         m_audioSynthesizer = new AudioSynthesizer(
             m_windowConfig.Settings.Width,
             m_windowConfig.Settings.Height,
@@ -107,6 +112,8 @@ public class MyGame : IGame
         m_pinkBoysHandler.Render(m_renderService.RenderPtr);
         m_physicsExample.Render(m_renderService.RenderPtr);
         m_audioSynthesizer.Render(m_renderService.RenderPtr, minHue, maxHue);
+        
+        m_partitioner.RenderDebug(m_renderService.RenderPtr, m_cameraService);
     }
 
     public void RenderGui()

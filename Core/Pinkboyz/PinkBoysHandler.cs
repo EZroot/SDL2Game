@@ -3,6 +3,7 @@ using SDL2;
 using SDL2Engine.Core.Addressables.Data;
 using SDL2Engine.Core.Addressables.Interfaces;
 using SDL2Engine.Core.Input;
+using SDL2Engine.Core.Partitions.Interfaces;
 using SDL2Engine.Core.Rendering.Interfaces;
 using SDL2Game.Core.Utils;
 
@@ -10,24 +11,24 @@ namespace SDL2Game.Core.Pinkboyz
 {
     public class PinkBoysHandler
     {
-        private const int PINKBOYS_MULTIPLIER = 20;
+        private const int PINKBOYS_MULTIPLIER = 1000;
         
         private readonly IAudioService m_audioService;
         private readonly IImageService m_imageService;
         private readonly ICameraService m_cameraService;
-
+        private readonly IPartitioner m_partitioner;
+        
         private GameObject m_pinkboy;
         private List<GameObject> m_pinkboysList = new List<GameObject>();
 
         private float m_currentScalepinkboy;
 
-        public PinkBoysHandler(IAudioService audioLoader,
-            IImageService assetManager,
-                        ICameraService cameraService)
+        public PinkBoysHandler(IAudioService audioLoader, IImageService assetManager, ICameraService cameraService, IPartitioner partitioner)
         {
             m_audioService = audioLoader;
             m_imageService = assetManager;
             m_cameraService = cameraService;
+            m_partitioner = partitioner;
         }
         
         public void Initialize(nint renderer)
@@ -38,7 +39,8 @@ namespace SDL2Game.Core.Pinkboyz
             m_pinkboy = new GameObject(
                 sprite: pinkboySprite,
                 scale: new Vector2(32, 32),
-                position: new Vector2(48, 174)
+                position: new Vector2(48, 174),
+                partitioner: m_partitioner
             );
 
             var texturePaths = new[]
@@ -75,7 +77,8 @@ namespace SDL2Game.Core.Pinkboyz
                 var pinkObj = new GameObject(
                     sprite: sprite,
                     position: startPos,
-                    scale: new Vector2(texData.Width,texData.Height)
+                    scale: new Vector2(texData.Width,texData.Height),
+                    partitioner: m_partitioner
                 );
 
                 m_pinkboysList.Add(pinkObj);
@@ -103,7 +106,7 @@ namespace SDL2Game.Core.Pinkboyz
         
         public void Render(nint renderer)
         {
-            float baseScale = 5f;
+            float baseScale = 1f;
             float amplitude = 0f;
             
             for (int i = 4; i < 16; i++)
