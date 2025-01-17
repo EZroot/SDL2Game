@@ -20,11 +20,11 @@ public class GuiExample
     private IVariableBinder m_variableBinder;
 
     private ImGuiDockData m_guiDockerData;
-    private int m_pokemonCount;
+    private int m_PinkboyCount;
     
     private GuiCellTableQuery m_guiPhysicsDebugCellTable;
     private GuiCellTableQuery m_guiAudioSynthCellTable;
-    private GuiStringQuery<int> m_guiStringQuery_PokemonCount;
+    private GuiStringQuery<int> m_guiStringQuery_PinkboyCount;
     private GuiStringQuery<string> m_guiStringQuery_MouseOverLabel;
     
     public GuiExample(IGuiRenderService guiRenderService, IGuiWindowBuilder guiWindowBuilder, IVariableBinder guiVarBinder, ISysInfo sysInfo)
@@ -44,7 +44,7 @@ public class GuiExample
 
         m_guiPhysicsDebugCellTable = new GuiCellTableQuery("CellTableOne",m_variableBinder);
         m_guiAudioSynthCellTable = new GuiCellTableQuery("CellTableAudioSynth",m_variableBinder);
-        m_guiStringQuery_PokemonCount = new GuiStringQuery<int>("Pokemon Count", m_variableBinder);
+        m_guiStringQuery_PinkboyCount = new GuiStringQuery<int>("Pinkboy Count", m_variableBinder);
         m_guiStringQuery_MouseOverLabel = new GuiStringQuery<string>("##MouseLabel", m_variableBinder);
     }
 
@@ -62,7 +62,7 @@ public class GuiExample
             Debug.RenderDebugConsole(ref m_showDebugConsole);
 
         m_guiWindowBuilder.BeginWindow("Physics Debugger");//m_guiDockerData.BottomDock.Name);
-        m_guiStringQuery_PokemonCount.DrawQuery(m_guiWindowBuilder);
+        m_guiStringQuery_PinkboyCount.DrawQuery(m_guiWindowBuilder);
         m_guiStringQuery_MouseOverLabel.DrawQuery(m_guiWindowBuilder);
         m_guiPhysicsDebugCellTable.DrawDebugQuery(m_guiWindowBuilder);
         m_guiWindowBuilder.EndWindow();
@@ -83,9 +83,9 @@ public class GuiExample
         m_guiAudioSynthCellTable.UpdateDebugQuery(debugQuery);
     }
     
-    public void UpdatePokemonCount(int addPokemonCount)
+    public void UpdatePinkboyCount(int addPinkboyCount)
     {
-        m_guiStringQuery_PokemonCount.UpdateQuery(addPokemonCount);
+        m_guiStringQuery_PinkboyCount.UpdateQuery(addPinkboyCount);
     }
     
     private void RenderFileMenu()

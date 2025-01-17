@@ -6,7 +6,7 @@ namespace SDL2Game.Core.Gui.Gui;
 
 public class GuiStringQuery<T> : GuiBase where T : IConvertible
 {
-    private string GUI_ID = "PokemonCount";
+    private string GUI_ID = "PinkboyCount";
     private T m_value;
 
     public GuiStringQuery(string id, IVariableBinder variableBinder) : base(variableBinder)

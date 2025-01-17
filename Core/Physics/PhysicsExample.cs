@@ -119,12 +119,13 @@ public class PhysicsExample
         // If space is pressed, spawn multiple boxes
         if (InputManager.IsKeyPressed(SDL.SDL_Keycode.SDLK_SPACE))
         {
-            Debug.Log("<color=yellow>SPACE pressed! Spawning 10 'jigglypuff' boxes...</color>");
+            Debug.Log("<color=yellow>SPACE pressed! Spawning 10 'pinkyboy' boxes...</color>");
 
-            var boxTexture = m_imageService.LoadTexture(m_renderService.RenderPtr, GameHelper.RESOURCES_FOLDER + "/jigglypuff.png");
+            var boxTexture = m_imageService.LoadTexture(m_renderService.RenderPtr, GameHelper.RESOURCES_FOLDER + "/pinkboy.png");
             Debug.Log($"Loaded Texture Id: {boxTexture.Id}, Size: {boxTexture.Width}x{boxTexture.Height}");
 
-            var sprite = new StaticSprite(boxTexture.Texture, boxTexture.Width, boxTexture.Height);
+            // var sprite = new StaticSprite(boxTexture.Texture, boxTexture.Width, boxTexture.Height);
+            var sprite = new AnimatedSprite(boxTexture.Texture, 32, 32, 4, 0.5f);
             
             var rnd = new Random();
             int numberOfBoxes = 1;
@@ -135,8 +136,8 @@ public class PhysicsExample
 
                 var boxObject = new GameObject(sprite: sprite, position: new Vector2(xPos, yPos), scale: Vector2.One);
 
-                float widthMeters = boxObject.Sprite.Width / 3;
-                float heightMeters = boxObject.Sprite.Height / 3;
+                float widthMeters = boxObject.Sprite.Width * 0.75f;
+                float heightMeters = boxObject.Sprite.Height * 0.75f;
 
                 Debug.Log($"Box #{i} -> Pos({xPos}, {yPos}), Size({widthMeters}x{heightMeters}), Registering as DynamicBody...");
 
@@ -146,7 +147,7 @@ public class PhysicsExample
                     heightMeters,
                     BodyType.DynamicBody
                 );
-                guiExample.UpdatePokemonCount(1);
+                guiExample.UpdatePinkboyCount(1);
                 m_boxes.Add(boxObject);
                 Debug.Log($"Box #{i} registered successfully!");
             }

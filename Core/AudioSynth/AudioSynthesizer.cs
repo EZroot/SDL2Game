@@ -27,7 +27,6 @@ public class AudioSynthesizer
 
     public void Initialize(int rectSpacing = 1, int rectWidth = 3, int rectMaxHeight = 40, float bandIntensity = 1.75f, float smoothingFactor = 0.3f)
     {
-        // Audio player rects
         m_bandIntensityMod = bandIntensity;
         m_rectSpacing = rectSpacing;
         m_maxRectHeight = rectMaxHeight;
@@ -35,8 +34,7 @@ public class AudioSynthesizer
 
         m_maxAmplitude = 0f;
         m_previousHeights = new float[m_audioService.FrequencyBands.Count];
-        m_smoothingFactor = smoothingFactor; // Smoothing factor between 0.1 and 0.3
-        // m_initialRectStartY = m_windowHeight / 2;//200; //(int)(m_maxRectHeight / 1.75f + m_maxRectHeight / 2);
+        m_smoothingFactor = smoothingFactor;
         
         SubscribeToEvents();
     }
