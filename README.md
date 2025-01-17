@@ -6,11 +6,12 @@ SDL2Engine: https://github.com/EZroot/SDL2Engine
 ![SDL Game Screenshot](screenshottys/pinkboy.png)
 
 ## Features
-
-- Audiosynthesizer 
-- - Displaying extracted audio band frequencies
-- Dancing Sprites
-- - Sprites pulse to the audio
+- Simple Audio Visualizer
+- Animated sprites
+- Box2D Physics
+- Pulsing sprite to music
+- Network chat
+- Debug Console window
 
 ## Prerequisites
 
