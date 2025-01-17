@@ -1,10 +1,15 @@
+using System.Numerics;
 using Microsoft.Extensions.DependencyInjection;
 using SDL2Engine.Core;
+using SDL2Engine.Core.Addressables.Data;
 using SDL2Engine.Core.Addressables.Interfaces;
+using SDL2Engine.Core.AI;
+using SDL2Engine.Core.AI.Data;
 using SDL2Engine.Core.CoreSystem.Configuration;
 using SDL2Engine.Core.GuiRenderer;
 using SDL2Engine.Core.GuiRenderer.Interfaces;
 using SDL2Engine.Core.Networking.Interfaces;
+using SDL2Engine.Core.Partitions;
 using SDL2Engine.Core.Partitions.Interfaces;
 using SDL2Engine.Core.Physics.Interfaces;
 using SDL2Engine.Core.Rendering.Interfaces;
@@ -21,7 +26,6 @@ namespace SDL2Game.Core;
 
 public class MyGame : IGame
 {
-
     #region Services
 
     private IWindowService m_windowService;
@@ -39,18 +43,23 @@ public class MyGame : IGame
     
     #endregion
 
-    private IPartitioner m_partitioner;
-    
     private PinkBoysHandler m_pinkBoysHandler;
     private AudioSynthesizer m_audioSynthesizer;
     private GuiExample m_guiExample;
     private PhysicsExample m_physicsExample;
     private NetworkExample m_networkExample;
     
+    private IPartitioner m_partitioner;
+    private BoidManager m_boidManager;
+    
+    private const int BoidCount = 1000;
+    private const float WorldSize = 1024;
+    private const float BoidSpeed = 5f;
+    
     private float minHue = 0.7f, maxHue = 0.85f;
     private float maxHueSeperation = 0.25f;
 
-    public void Initialize(IServiceProvider serviceProvider, IPartitioner parititioner)
+    public void Initialize(IServiceProvider serviceProvider)
     {
         #region Setup Services
         m_windowService = serviceProvider.GetService<IWindowService>() ?? throw new InvalidOperationException("IServiceWindowService is required but not registered.");
@@ -67,10 +76,39 @@ public class MyGame : IGame
         m_networkService = serviceProvider.GetService<INetworkService>() ?? throw new InvalidOperationException("INetworkService is required but not registered.");
         #endregion
 
-        m_partitioner = parititioner;
-        
+        m_partitioner = new SpatialPartitioner(32);
         InitializeInternal();
         Debug.Log("Initialized MyGame!");
+        InitializeBoids();
+    }
+    
+    private void InitializeBoids()
+    {
+        var renderer = m_renderService.RenderPtr;
+
+        // Load the boid sprite texture
+        var boidTexture = m_imageService.LoadTexture(renderer, GameHelper.RESOURCES_FOLDER + "/pinkboy.png");
+
+        // Create boid data
+        var boidGroupData = new List<BoidGroupData>();
+        var random = new Random();
+
+        for (int i = 0; i < BoidCount; i++)
+        {
+            var boidSprite = new AnimatedSprite(boidTexture.Texture, 32, 32, 4, 0.5f);
+
+            var position = new Vector2(
+                (float)(random.NextDouble() * WorldSize),
+                (float)(random.NextDouble() * WorldSize)
+            );
+
+            var scale = new Vector2(1, 1);
+
+            boidGroupData.Add(new BoidGroupData(sprite: boidSprite, position: position, scale: scale));
+        }
+
+        m_boidManager = new BoidManager(m_partitioner as SpatialPartitioner, WorldSize, BoidSpeed);
+        m_boidManager.InitializeBoids(boidGroupData.ToArray());
     }
 
     private void InitializeInternal()
@@ -98,6 +136,7 @@ public class MyGame : IGame
     {
         m_physicsExample.Update(deltaTime, m_guiExample);
         m_pinkBoysHandler.Update(deltaTime);
+        m_boidManager.UpdateBoids(deltaTime);
     }
 
     public void Render()
@@ -112,8 +151,8 @@ public class MyGame : IGame
         m_pinkBoysHandler.Render(m_renderService.RenderPtr);
         m_physicsExample.Render(m_renderService.RenderPtr);
         m_audioSynthesizer.Render(m_renderService.RenderPtr, minHue, maxHue);
-        
-        m_partitioner.RenderDebug(m_renderService.RenderPtr, m_cameraService);
+        m_boidManager.RenderBoids(m_renderService.RenderPtr, m_cameraService);
+        // m_partitioner.RenderDebug(m_renderService.RenderPtr, m_cameraService);
     }
 
     public void RenderGui()

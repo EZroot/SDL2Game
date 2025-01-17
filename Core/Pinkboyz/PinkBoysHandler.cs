@@ -11,7 +11,7 @@ namespace SDL2Game.Core.Pinkboyz
 {
     public class PinkBoysHandler
     {
-        private const int PINKBOYS_MULTIPLIER = 1000;
+        private const int PINKBOYS_MULTIPLIER = 1;
         
         private readonly IAudioService m_audioService;
         private readonly IImageService m_imageService;
