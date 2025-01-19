@@ -54,7 +54,8 @@ public class MyGame : IGame
     
     private const int BoidCount = 1000;
     private const float WorldSize = 1024;
-    private const float BoidSpeed = 5f;
+    private const float BoidSpeed = 10f;
+    private const int SpatialPartitionerSize = 16;
     
     private float minHue = 0.7f, maxHue = 0.85f;
     private float maxHueSeperation = 0.25f;
@@ -76,7 +77,7 @@ public class MyGame : IGame
         m_networkService = serviceProvider.GetService<INetworkService>() ?? throw new InvalidOperationException("INetworkService is required but not registered.");
         #endregion
 
-        m_partitioner = new SpatialPartitioner(32);
+        m_partitioner = new SpatialPartitioner(SpatialPartitionerSize);
         InitializeInternal();
         Debug.Log("Initialized MyGame!");
         InitializeBoids();
@@ -85,11 +86,8 @@ public class MyGame : IGame
     private void InitializeBoids()
     {
         var renderer = m_renderService.RenderPtr;
-
-        // Load the boid sprite texture
         var boidTexture = m_imageService.LoadTexture(renderer, GameHelper.RESOURCES_FOLDER + "/pinkboy.png");
 
-        // Create boid data
         var boidGroupData = new List<BoidGroupData>();
         var random = new Random();
 
