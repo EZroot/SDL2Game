@@ -1,7 +1,10 @@
 using System.Numerics;
 using Microsoft.Extensions.DependencyInjection;
+using SDL2;
 using SDL2Engine.Core;
 using SDL2Engine.Core.Addressables.Data;
+using SDL2Engine.Core.Addressables.Fonts;
+using SDL2Engine.Core.Addressables.Fonts.Interfaces;
 using SDL2Engine.Core.Addressables.Interfaces;
 using SDL2Engine.Core.AI;
 using SDL2Engine.Core.AI.Data;
@@ -40,7 +43,8 @@ public class MyGame : IGame
     private IPhysicsService m_physicsService;
     private ISysInfo m_sysInfo;
     private INetworkService m_networkService;
-    
+    private IFontService m_fontService;
+
     #endregion
 
     private PinkBoysHandler m_pinkBoysHandler;
@@ -51,7 +55,9 @@ public class MyGame : IGame
     
     private IPartitioner m_partitioner;
     private BoidManager m_boidManager;
-    
+
+    private FontTexture m_testFontTexture;
+
     private const int BoidCount = 1000;
     private const float WorldSize = 1024;
     private const float BoidSpeed = 10f;
@@ -75,6 +81,7 @@ public class MyGame : IGame
         m_guiWindowBuilder = serviceProvider.GetService<IGuiWindowBuilder>() ?? throw new InvalidOperationException("IServiceGuiWindowBuilder is required but not registered.");
         m_guiVarBinder = serviceProvider.GetService<IVariableBinder>() ?? throw new InvalidOperationException("IVariableBinder is required but not registered.");
         m_networkService = serviceProvider.GetService<INetworkService>() ?? throw new InvalidOperationException("INetworkService is required but not registered.");
+        m_fontService = serviceProvider.GetService<IFontService>() ?? throw new InvalidOperationException("IFontService is required but not registered.");
         #endregion
 
         m_partitioner = new SpatialPartitioner(SpatialPartitionerSize);
@@ -109,6 +116,7 @@ public class MyGame : IGame
         m_boidManager.InitializeBoids(boidGroupData.ToArray());
     }
 
+    
     private void InitializeInternal()
     {
         m_guiExample = new GuiExample(m_guiRenderService, m_guiWindowBuilder, m_guiVarBinder, m_sysInfo);
@@ -126,7 +134,9 @@ public class MyGame : IGame
         var songPath = GameHelper.SOUND_FOLDER + "/skidrow.wav";//"/pokemon.wav";"
         var song = m_audioService.LoadSound(songPath);
         m_audioService.PlaySound(song, GameHelper.GLOBAL_VOLUME);
-        
+
+        var fontTexture = m_fontService.LoadFont(GameHelper.RESOURCES_FOLDER + "/fonts/retrogaming.ttf");
+        m_testFontTexture = m_fontService.CreateFontTexture(fontTexture, "THIS IS A FONT TEST", new SDL.SDL_Color() { r = 255, g = 255, b = 255 }, (300,200));
         m_networkExample.Initialize();
     }
 
@@ -150,6 +160,7 @@ public class MyGame : IGame
         m_physicsExample.Render(m_renderService.RenderPtr);
         m_audioSynthesizer.Render(m_renderService.RenderPtr, minHue, maxHue);
         m_boidManager.RenderBoids(m_renderService.RenderPtr, m_cameraService);
+        m_fontService.RenderFont(m_testFontTexture);
         // m_partitioner.RenderDebug(m_renderService.RenderPtr, m_cameraService);
     }
 
@@ -163,5 +174,6 @@ public class MyGame : IGame
     {
         m_networkExample.Shutdown();
         m_pinkBoysHandler.CleanUp();
+        m_fontService.CleanupFontTexture(m_testFontTexture);
     }
 }
