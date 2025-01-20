@@ -60,10 +60,10 @@ public class MyGame : IGame
     private FontTexture m_testFontTexture;
     private SpriteFontTexture m_testFontSpriteTexture;
 
-    private const int BoidCount = 1000;
+    private const int BoidCount = 10000;
     private const float WorldSize = 1024;
     private const float BoidSpeed = 40f;
-    private const int SpatialPartitionerSize = 16;
+    private const int SpatialPartitionerSize = 32;
     
     private float minHue = 0.7f, maxHue = 0.85f;
     private float maxHueSeperation = 0.25f;
