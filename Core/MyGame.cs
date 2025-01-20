@@ -62,7 +62,7 @@ public class MyGame : IGame
 
     private const int BoidCount = 10000;
     private const float WorldSize = 1024;
-    private const float BoidSpeed = 40f;
+    private const float BoidSpeed = 10f;
     private const int SpatialPartitionerSize = 32;
     
     private float minHue = 0.7f, maxHue = 0.85f;
@@ -152,7 +152,6 @@ public class MyGame : IGame
         m_pinkBoysHandler.Update(deltaTime);
         m_boidManager.UpdateBoids(deltaTime);
         m_testFontTexture = m_fontService.CreateFontTexture(m_fontPointr, $"THIS IS A FONT TEST DeltaTime: ({deltaTime})", new SDL.SDL_Color() { r = 255, g = 255, b = 255 }, (300,200));
-
     }
 
     public void Render()
@@ -169,7 +168,7 @@ public class MyGame : IGame
         m_audioSynthesizer.Render(m_renderService.RenderPtr, minHue, maxHue);
         m_boidManager.RenderBoids(m_renderService.RenderPtr, m_cameraService);
         m_fontService.RenderFont(m_testFontTexture);
-        m_fontService.RenderStringSprite(m_testFontSpriteTexture, $"this is a test!!! .,?><+-= {Time.DeltaTime}", (200,50), -10);
+        m_fontService.RenderStringSprite(m_testFontSpriteTexture, $"Pinkyboy Engine {Time.DeltaTime}", (200,30), -10);
         // m_partitioner.RenderDebug(m_renderService.RenderPtr, m_cameraService);
     }
 
