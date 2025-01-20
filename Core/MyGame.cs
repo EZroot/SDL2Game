@@ -56,11 +56,13 @@ public class MyGame : IGame
     private IPartitioner m_partitioner;
     private BoidManager m_boidManager;
 
+    private nint m_fontPointr;
     private FontTexture m_testFontTexture;
+    private SpriteFontTexture m_testFontSpriteTexture;
 
     private const int BoidCount = 1000;
     private const float WorldSize = 1024;
-    private const float BoidSpeed = 10f;
+    private const float BoidSpeed = 40f;
     private const int SpatialPartitionerSize = 16;
     
     private float minHue = 0.7f, maxHue = 0.85f;
@@ -127,7 +129,8 @@ public class MyGame : IGame
             m_windowConfig.Settings.Height,
             m_audioService);
         m_networkExample = new NetworkExample(m_networkService, m_guiRenderService, m_guiWindowBuilder, m_guiVarBinder);
-        
+        m_networkExample.Initialize();
+
         m_pinkBoysHandler.Initialize(m_renderService.RenderPtr);
         m_audioSynthesizer.Initialize(rectWidth: 4, rectMaxHeight: 75, rectSpacing: 4, bandIntensity: 3f);
 
@@ -135,9 +138,12 @@ public class MyGame : IGame
         var song = m_audioService.LoadSound(songPath);
         m_audioService.PlaySound(song, GameHelper.GLOBAL_VOLUME);
 
-        var fontTexture = m_fontService.LoadFont(GameHelper.RESOURCES_FOLDER + "/fonts/retrogaming.ttf");
-        m_testFontTexture = m_fontService.CreateFontTexture(fontTexture, "THIS IS A FONT TEST", new SDL.SDL_Color() { r = 255, g = 255, b = 255 }, (300,200));
-        m_networkExample.Initialize();
+        m_fontPointr = m_fontService.LoadFont(GameHelper.RESOURCES_FOLDER + "/fonts/retrogaming.ttf");
+        m_testFontSpriteTexture = m_fontService.LoadSpriteFont(
+            GameHelper.RESOURCES_FOLDER + "/fonts/pinkyboyfont-sheet.png",
+            32,
+            32,
+            44);
     }
 
     public void Update(float deltaTime)
@@ -145,6 +151,8 @@ public class MyGame : IGame
         m_physicsExample.Update(deltaTime, m_guiExample);
         m_pinkBoysHandler.Update(deltaTime);
         m_boidManager.UpdateBoids(deltaTime);
+        m_testFontTexture = m_fontService.CreateFontTexture(m_fontPointr, $"THIS IS A FONT TEST DeltaTime: ({deltaTime})", new SDL.SDL_Color() { r = 255, g = 255, b = 255 }, (300,200));
+
     }
 
     public void Render()
@@ -161,6 +169,7 @@ public class MyGame : IGame
         m_audioSynthesizer.Render(m_renderService.RenderPtr, minHue, maxHue);
         m_boidManager.RenderBoids(m_renderService.RenderPtr, m_cameraService);
         m_fontService.RenderFont(m_testFontTexture);
+        m_fontService.RenderStringSprite(m_testFontSpriteTexture, $"this is a test!!! .,?><+-= {Time.DeltaTime}", (200,50), -10);
         // m_partitioner.RenderDebug(m_renderService.RenderPtr, m_cameraService);
     }
 
