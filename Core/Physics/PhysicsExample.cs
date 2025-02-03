@@ -1,5 +1,5 @@
-using System.Numerics;
 using Box2DSharp.Dynamics;
+using OpenTK.Mathematics;
 using SDL2;
 using SDL2Engine.Core.Addressables.Data;
 using SDL2Engine.Core.Addressables.Interfaces;
@@ -134,7 +134,7 @@ public class PhysicsExample
                 float xPos = rnd.Next(150, m_windowConfig.Settings.Width - 150);
                 float yPos = 100; // start them near the top
 
-                var boxObject = new GameObject(sprite: sprite, position: new Vector2(xPos, yPos), scale: Vector2.One);
+                var boxObject = new GameObject(sprite: sprite, position: new Vector3(xPos, yPos,0), scale: Vector2.One);
 
                 float widthMeters = boxObject.Sprite.Width * 0.75f;
                 float heightMeters = boxObject.Sprite.Height * 0.75f;
@@ -180,7 +180,7 @@ public class PhysicsExample
                 if (index > 20) break;
                 var box = m_boxes[index];
                 Vector2 force = new Vector2(deltaX, deltaY);
-                box.PhysicsBody.ApplyForce(force, box.PhysicsBody.GetWorldCenter(), true);
+                box.PhysicsBody.ApplyForce(new System.Numerics.Vector2(force.X,force.Y), box.PhysicsBody.GetWorldCenter(), true);
             }
 
             prevMouseX = mouseX;

@@ -64,7 +64,8 @@ public class GuiExample
         m_guiWindowBuilder.BeginWindow("Physics Debugger");//m_guiDockerData.BottomDock.Name);
         m_guiStringQuery_PinkboyCount.DrawQuery(m_guiWindowBuilder);
         m_guiStringQuery_MouseOverLabel.DrawQuery(m_guiWindowBuilder);
-        m_guiPhysicsDebugCellTable.DrawDebugQuery(m_guiWindowBuilder);
+        // Todo: Fix this trash causing crashes
+        // m_guiPhysicsDebugCellTable.DrawDebugQuery(m_guiWindowBuilder);
         m_guiWindowBuilder.EndWindow();
     }
 

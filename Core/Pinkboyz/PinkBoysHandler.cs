@@ -1,4 +1,4 @@
-using System.Numerics;
+using OpenTK.Mathematics;
 using SDL2;
 using SDL2Engine.Core.Addressables.Data;
 using SDL2Engine.Core.Addressables.Interfaces;
@@ -39,7 +39,7 @@ namespace SDL2Game.Core.Pinkboyz
             m_pinkboy = new GameObject(
                 sprite: pinkboySprite,
                 scale: new Vector2(32, 32),
-                position: new Vector2(48, 174),
+                position: new Vector3(48, 174, 0),
                 partitioner: m_partitioner
             );
 
@@ -67,9 +67,10 @@ namespace SDL2Game.Core.Pinkboyz
                 int col = i % 10;
                 var spacing = -20;
 
-                var startPos = new Vector2(
+                var startPos = new Vector3(
                     330 + (col * (texData.Width + spacing)), 
-                    0 + (row * (texData.Height + spacing))
+                    0 + (row * (texData.Height + spacing)),
+                    0
                 );
                 
                 // var sprite = new StaticSprite(texData.Texture, texData.Width, texData.Height);
@@ -88,13 +89,13 @@ namespace SDL2Game.Core.Pinkboyz
         public void Update(float deltaTime)
         {
             if (InputManager.IsKeyPressed(SDL.SDL_Keycode.SDLK_w))
-                m_pinkboy.Position = new Vector2(m_pinkboy.Position.X, m_pinkboy.Position.Y - 10f * deltaTime);
+                m_pinkboy.Position = new Vector3(m_pinkboy.Position.X, m_pinkboy.Position.Y - 10f * deltaTime, 0f);
             if (InputManager.IsKeyPressed(SDL.SDL_Keycode.SDLK_a))
-                m_pinkboy.Position = new Vector2(m_pinkboy.Position.X - 10f * deltaTime, m_pinkboy.Position.Y);
+                m_pinkboy.Position = new Vector3(m_pinkboy.Position.X - 10f * deltaTime, m_pinkboy.Position.Y, 0f);
             if (InputManager.IsKeyPressed(SDL.SDL_Keycode.SDLK_s))
-                m_pinkboy.Position = new Vector2(m_pinkboy.Position.X, m_pinkboy.Position.Y + 10f * deltaTime);
+                m_pinkboy.Position = new Vector3(m_pinkboy.Position.X, m_pinkboy.Position.Y + 10f * deltaTime, 0f);
             if (InputManager.IsKeyPressed(SDL.SDL_Keycode.SDLK_d))
-                m_pinkboy.Position = new Vector2(m_pinkboy.Position.X + 10f * deltaTime, m_pinkboy.Position.Y);
+                m_pinkboy.Position = new Vector3(m_pinkboy.Position.X + 10f * deltaTime, m_pinkboy.Position.Y, 0f);
 
             m_pinkboy.Update(deltaTime);
 
@@ -135,8 +136,8 @@ namespace SDL2Game.Core.Pinkboyz
                 float bounceX = 10f * (float)System.Math.Sin(Time.TotalTime * 2f + i * 0.5f);
                 float bounceY = 5f  * (float)System.Math.Cos(Time.TotalTime * 3f + i * 0.3f);
 
-                Vector2 originalPos = pinky.Position;
-                pinky.Position = new Vector2(originalPos.X + bounceX, originalPos.Y + bounceY);
+                var originalPos = pinky.Position;
+                pinky.Position = new Vector3(originalPos.X + bounceX, originalPos.Y + bounceY, 0);
                 pinky.Rotation += bounceX * MathHelper.TwoPi * Time.DeltaTime;
                 pinky.Render(renderer, m_cameraService);
 
