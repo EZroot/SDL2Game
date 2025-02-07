@@ -15,7 +15,7 @@ using SDL2Engine.Core.Networking.Interfaces;
 using SDL2Engine.Core.Partitions;
 using SDL2Engine.Core.Partitions.Interfaces;
 using SDL2Engine.Core.Physics.Interfaces;
-using SDL2Engine.Core.Rendering.Interfaces;
+using SDL2Engine.Core.Cameras.Interfaces;
 using SDL2Engine.Core.Utils;
 using SDL2Engine.Core.Windowing.Interfaces;
 using SDL2Game.Core.AudioSynth;
@@ -95,7 +95,7 @@ public class MyGame : IGame
     private void InitializeBoids()
     {
         var renderer = m_renderService.RenderPtr;
-        var boidTexture = m_imageService.LoadTexture(renderer, GameHelper.RESOURCES_FOLDER + "/pinkboy.png");
+        var boidTexture = m_imageService.LoadTexture(GameHelper.RESOURCES_FOLDER + "/pinkboy.png");
 
         var boidGroupData = new List<BoidGroupData>();
         var random = new Random();

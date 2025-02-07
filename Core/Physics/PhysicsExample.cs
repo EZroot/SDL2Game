@@ -6,7 +6,7 @@ using SDL2Engine.Core.Addressables.Interfaces;
 using SDL2Engine.Core.CoreSystem.Configuration;
 using SDL2Engine.Core.Input;
 using SDL2Engine.Core.Physics.Interfaces;
-using SDL2Engine.Core.Rendering.Interfaces;
+using SDL2Engine.Core.Cameras.Interfaces;
 using SDL2Engine.Core.Utils;
 using SDL2Game.Core.Gui;
 using SDL2Game.Core.Utils;
@@ -121,7 +121,7 @@ public class PhysicsExample
         {
             Debug.Log("<color=yellow>SPACE pressed! Spawning 10 'pinkyboy' boxes...</color>");
 
-            var boxTexture = m_imageService.LoadTexture(m_renderService.RenderPtr, GameHelper.RESOURCES_FOLDER + "/pinkboy.png");
+            var boxTexture = m_imageService.LoadTexture(GameHelper.RESOURCES_FOLDER + "/pinkboy.png");
             Debug.Log($"Loaded Texture Id: {boxTexture.Id}, Size: {boxTexture.Width}x{boxTexture.Height}");
 
             // var sprite = new StaticSprite(boxTexture.Texture, boxTexture.Width, boxTexture.Height);

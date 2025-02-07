@@ -4,7 +4,7 @@ using SDL2Engine.Core.Addressables.Data;
 using SDL2Engine.Core.Addressables.Interfaces;
 using SDL2Engine.Core.Input;
 using SDL2Engine.Core.Partitions.Interfaces;
-using SDL2Engine.Core.Rendering.Interfaces;
+using SDL2Engine.Core.Cameras.Interfaces;
 using SDL2Game.Core.Utils;
 
 namespace SDL2Game.Core.Pinkboyz
@@ -33,7 +33,7 @@ namespace SDL2Game.Core.Pinkboyz
         
         public void Initialize(nint renderer)
         {
-            var pinkboyTexture = m_imageService.LoadTexture(renderer, GameHelper.RESOURCES_FOLDER + "/pinkboy.png");
+            var pinkboyTexture = m_imageService.LoadTexture(GameHelper.RESOURCES_FOLDER + "/pinkboy.png");
             // var pinkboySprite = new StaticSprite(pinkboyTexture.Texture, pinkboyTexture.Width, pinkboyTexture.Height);
             var pinkboySprite = new AnimatedSprite(pinkboyTexture.Texture, 32, 32, 4, 0.5f);//pinkboyTexture.Width, pinkboyTexture.Height);
             m_pinkboy = new GameObject(
@@ -54,7 +54,7 @@ namespace SDL2Game.Core.Pinkboyz
             {
                 foreach (var path in texturePaths)
                 {
-                    var tex = m_imageService.LoadTexture(renderer, GameHelper.RESOURCES_FOLDER + path);
+                    var tex = m_imageService.LoadTexture(GameHelper.RESOURCES_FOLDER + path);
                     allTextures.Add(tex);
                 }
             }
